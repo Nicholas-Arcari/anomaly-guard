@@ -1,0 +1,17 @@
+{
+  "name": "@anomaly-guard/traffic",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Seeded, reproducible generator of simulated legitimate and malicious web requests, and a labelled dataset builder.",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "@anomaly-guard/core": "*"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}

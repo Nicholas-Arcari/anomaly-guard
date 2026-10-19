@@ -1,0 +1,32 @@
+# --- System ---
+.DS_Store
+Thumbs.db
+
+# --- Dependencies ---
+node_modules/
+
+# --- Build output ---
+dist/
+packages/*/dist/
+
+# --- Environment ---
+.env
+.env.*
+!.env.example
+
+# --- Experiment artefacts (datasets and results are reproducible from a seed) ---
+data/
+results/
+*.local
+
+# --- Logs & coverage ---
+*.log
+logs/
+coverage/
+
+# --- IDEs ---
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.swp

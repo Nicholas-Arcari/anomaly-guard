@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Anomaly Guard</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #ffffff;
+        --fg: #1a1a1a;
+        --muted: #5c6370;
+        --card: #f6f7f9;
+        --border: #e2e5ea;
+        --accent: #2f6feb;
+        --attack: #c23b3b;
+        --legit: #2f8f4e;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #15171c;
+          --fg: #e8eaed;
+          --muted: #9aa2ad;
+          --card: #1d2026;
+          --border: #2b2f37;
+          --accent: #5b8bff;
+          --attack: #e85d5d;
+          --legit: #4fc27a;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font:
+          15px/1.5 system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+      }
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 24px 16px 64px;
+      }
+      h1 {
+        font-size: 1.5rem;
+        margin: 0 0 4px;
+      }
+      .sub {
+        color: var(--muted);
+        margin: 0 0 24px;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: end;
+        margin-bottom: 20px;
+      }
+      .controls label {
+        display: flex;
+        flex-direction: column;
+        font-size: 0.8rem;
+        color: var(--muted);
+        gap: 4px;
+      }
+      .controls input,
+      .controls select {
+        font: inherit;
+        padding: 6px 8px;
+        background: var(--card);
+        color: var(--fg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+      }
+      button {
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 7px 14px;
+        background: var(--accent);
+        color: #fff;
+        border: 0;
+        border-radius: 6px;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 14px;
+      }
+      .card .k {
+        color: var(--muted);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+      .card .v {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-top: 2px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 7px 8px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-weight: 600;
+      }
+      td.payload {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        word-break: break-all;
+      }
+      .tag {
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 1px 7px;
+        border-radius: 999px;
+      }
+      .tag.attack {
+        color: var(--attack);
+        border: 1px solid var(--attack);
+      }
+      .tag.legit {
+        color: var(--legit);
+        border: 1px solid var(--legit);
+      }
+      .wrong {
+        outline: 2px solid var(--attack);
+        outline-offset: -2px;
+      }
+      footer {
+        margin-top: 32px;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+      a {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>The Anomaly Guard</h1>
+      <p class="sub">
+        Educational IDS — rules + statistical anomaly detection, running entirely in your browser.
+      </p>
+
+      <div class="controls">
+        <label>Seed <input id="seed" type="number" value="42" /></label>
+        <label>Test size <input id="size" type="number" value="1000" /></label>
+        <label
+          >Attack prevalence
+          <input id="prevalence" type="number" value="0.1" step="0.01" min="0" max="1" />
+        </label>
+        <label>Threshold (z) <input id="threshold" type="number" value="3" step="0.1" /></label>
+        <label
+          >Mode
+          <select id="mode">
+            <option value="combined">combined</option>
+            <option value="rules">rules only</option>
+            <option value="stats">stats only</option>
+          </select>
+        </label>
+        <button id="run">Run experiment</button>
+      </div>
+
+      <div class="cards" id="cards"></div>
+
+      <h2 style="font-size: 1.05rem">Sample of results</h2>
+      <p class="sub" style="margin-top: -8px">
+        Rows outlined in red are detector mistakes (false positive or false negative).
+      </p>
+      <div style="overflow-x: auto"><table id="results"></table></div>
+
+      <footer>
+        This is a simulation: all traffic is generated locally and no payload is ever executed or
+        sent. Baseline detector — the chi-square test and ROC are still stubs (see the backlog).
+      </footer>
+    </main>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

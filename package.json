@@ -1,0 +1,31 @@
+{
+  "name": "anomaly-guard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The Anomaly Guard — an educational IDS that combines rule-based checks with statistical anomaly detection, and measures its own false positives and false negatives.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "packages/core",
+    "packages/traffic",
+    "packages/evaluation",
+    "packages/server",
+    "packages/dashboard"
+  ],
+  "scripts": {
+    "test": "node --test packages/*/test/*.test.js",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "dev": "npm run dev --workspace @anomaly-guard/dashboard",
+    "dev:server": "npm run start --workspace @anomaly-guard/server",
+    "build": "npm run build --workspace @anomaly-guard/dashboard"
+  },
+  "devDependencies": {
+    "eslint": "^9.13.0",
+    "prettier": "^3.3.3"
+  }
+}

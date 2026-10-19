@@ -1,0 +1,20 @@
+{
+  "name": "@anomaly-guard/dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser dashboard (Vite). Runs the whole detection + evaluation pipeline client-side so it can be hosted on GitHub Pages.",
+  "dependencies": {
+    "@anomaly-guard/core": "*",
+    "@anomaly-guard/traffic": "*",
+    "@anomaly-guard/evaluation": "*"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  }
+}
