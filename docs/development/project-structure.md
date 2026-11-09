@@ -68,14 +68,17 @@ anomaly-guard/
 - A workspace **never** reaches into another workspace's `src/` internals — import from its
   package entry (`@anomaly-guard/<name>`).
 
-| Workspace     | Area             | Owner          | Key exports (planned)                                                                                   |
-| ------------- | ---------------- | -------------- | ------------------------------------------------------------------------------------------------------- |
-| `core`        | detection engine | **C** + shared | `extractFeatures`, `RuleEngine`, `trainStatModel`, `scoreRequest`, `paramKey`, `pToScore`, `detect`     |
-| `traffic`     | data             | **A**          | `createRng`, `makeLegitRequest`, `makeAttackRequest`, `buildDataset` (train / calibration / test)       |
-| `evaluation`  | evaluation       | **D**          | `confusionMatrix`, `metrics`, `rocCurve`, `positivePredictiveValue`, `thresholdAtFpr`, `wilsonInterval` |
-| `server`      | server/rules     | **B**          | Express app: `POST /ingest`, `GET /health`                                                              |
-| `dashboard`   | UI + report      | **E**          | browser app; GitHub Pages build                                                                         |
-| `experiments` | experiment runs  | **D**          | (planned, D-04) multi-seed runner writing `results/`                                                    |
+The work is owned by statistical theme (T1–T4, [backlog](../planning/backlog.md) §8), not by
+workspace: a theme spans several workspaces, and the **Themes** column says who works where.
+
+| Workspace     | Area             | Themes                                                  | Key exports (planned)                                                                                   |
+| ------------- | ---------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `core`        | detection engine | T1 (chi-square, rules), T2 (length, outliers, detector) | `extractFeatures`, `RuleEngine`, `trainStatModel`, `scoreRequest`, `paramKey`, `pToScore`, `detect`     |
+| `traffic`     | data             | T4                                                      | `createRng`, `makeLegitRequest`, `makeAttackRequest`, `buildDataset` (train / calibration / test)       |
+| `evaluation`  | evaluation       | T3 (T4 uses `positivePredictiveValue`)                  | `confusionMatrix`, `metrics`, `rocCurve`, `positivePredictiveValue`, `thresholdAtFpr`, `wilsonInterval` |
+| `server`      | live monitor     | T3 (B-02)                                               | Express app: `POST /ingest`, `GET /health`                                                              |
+| `dashboard`   | UI               | everyone: one chart per theme                           | browser app; GitHub Pages build                                                                         |
+| `experiments` | experiment runs  | T3                                                      | (planned, D-04) multi-seed runner writing `results/`                                                    |
 
 ## 3. `packages/core` internals
 

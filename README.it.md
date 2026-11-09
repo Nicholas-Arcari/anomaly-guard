@@ -49,11 +49,21 @@ La documentazione tecnica di dettaglio è in inglese (lingua di default del prog
   base-rate / Bayes)
 - [`docs/planning/backlog.md`](docs/planning/backlog.md) — board dei task (chi fa cosa)
 
-## Divisione del lavoro (gruppo 3–5)
+## Divisione del lavoro
 
-Ogni workspace corrisponde a una persona, così ognuno ha un contributo documentabile per la
-valutazione individuale: **A** traffico/dataset, **B** server + regole, **C** modelli statistici,
-**D** valutazione (matrice, ROC), **E** dashboard + relazione.
+Il lavoro è diviso per **tema statistico**, non per pacchetto, perché l'esame è di statistica.
+Ognuno segue un tema dall'inizio alla fine (funzioni, test, grafico nella dashboard, capitolo
+della relazione), così il contributo individuale è documentabile:
+
+| Tema                                    | Domanda                                                            | Task                    |
+| --------------------------------------- | ------------------------------------------------------------------ | ----------------------- |
+| **T1** Distribuzioni dei caratteri e χ² | La composizione dei caratteri di un valore è normale?              | C-03, C-08, B-01        |
+| **T2** Lunghezze e outlier              | Un valore è troppo lungo, o strano insieme agli altri?             | C-04 – C-07             |
+| **T3** Valutazione e incertezza         | Quanto sbaglia il sistema, e quanto sono affidabili quei numeri?   | D-03 – D-06, B-02, E-06 |
+| **T4** Probabilità e simulazione        | Com'è fatto il traffico, e cosa succede se gli attacchi sono rari? | A-02 – A-05, E-03       |
+
+Concetti statistici di ogni tema, ordine di lavoro e cosa è in comune (relazione, pubblicazione
+su Pages): [`docs/planning/backlog.md`](docs/planning/backlog.md) §8.
 
 ## Riferimento
 

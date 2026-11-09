@@ -62,19 +62,23 @@ Full list with rationale: [`docs/development/tech-stack.md`](docs/development/te
 
 ## 4. Repository layout & who owns what
 
-Each workspace maps to one person in a group of 3–5, so every member has a documented
-contribution for the individual grade. Full tree + dependency rules:
+Workspaces in `packages/`: `core` (features, rules, statistical models, detector — imported by
+everything, so it must never couple to a runtime), `traffic` (seeded generator, labelled dataset),
+`evaluation` (metrics, ROC/AUC, base rate), `server` (Express live monitor), `dashboard` (browser
+UI, GitHub Pages build). Tree + dependency rules:
 [`docs/development/project-structure.md`](docs/development/project-structure.md).
 
-| Workspace             | Area                                                                  | Owner (suggested)        |
-| --------------------- | --------------------------------------------------------------------- | ------------------------ |
-| `packages/core`       | feature extraction, rule engine, statistical models, detector         | **C** (stats) + shared   |
-| `packages/traffic`    | seeded generator of legitimate + malicious requests, labelled dataset | **A** (data)             |
-| `packages/evaluation` | confusion matrix, metrics, ROC/AUC, base-rate                         | **D** (evaluation)       |
-| `packages/server`     | Express live monitor that ingests simulated requests                  | **B** (server/rules)     |
-| `packages/dashboard`  | browser UI: verdicts, histograms, ROC, GitHub Pages build             | **E** (dashboard/report) |
+**Work is owned by statistical theme, not by package** — the exam is on statistics. Each member
+owns one theme end to end (functions, tests, dashboard chart, report chapter) wherever the code
+lives, so every contribution is documentable for the individual grade. Details and first wave:
+[`docs/planning/backlog.md`](docs/planning/backlog.md) §8.
 
-`core` is imported by everything else; it is the one place that must never couple to a runtime.
+| Theme                                 | Tasks                   |
+| ------------------------------------- | ----------------------- |
+| **T1** Character distributions and χ² | C-03, C-08, B-01        |
+| **T2** Lengths and outliers           | C-04 – C-07             |
+| **T3** Evaluation and uncertainty     | D-03 – D-06, B-02, E-06 |
+| **T4** Probability and simulation     | A-02 – A-05, E-03       |
 
 ---
 
