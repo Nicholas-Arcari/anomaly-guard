@@ -16,7 +16,10 @@ export { RuleEngine, DEFAULT_RULES } from './rules/engine.js';
 export {
   trainStatModel,
   scoreRequest,
+  paramKey,
+  pToScore,
   lengthZScore,
+  lengthScore,
   chiSquareScore, // stub — backlog C-03
 } from './stats/anomaly.js';
 
