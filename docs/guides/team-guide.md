@@ -97,6 +97,9 @@ Update your task's status in `docs/planning/backlog.md` in the same pull request
 teammate's review, merge it on GitHub and delete the branch. The dashboard has its own notes for
 adding your theme's chart: [`packages/dashboard/README.md`](../../packages/dashboard/README.md).
 
+Working with an AI assistant — Claude Code, an editor agent or a chat — or with none: one
+prompt for every task, with the files each task needs, in [`task-prompt.md`](task-prompt.md).
+
 ## Part 2 — Show the live demo in your portfolio
 
 The demo is published once, from this repository. Your portfolio only **points to it**: no code is
