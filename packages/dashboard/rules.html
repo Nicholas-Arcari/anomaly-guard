@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="The signature rules of The Anomaly Guard and how often each one matched the simulated traffic."
+    />
+    <title>Rules · The Anomaly Guard</title>
+    <link rel="icon" type="image/svg+xml" href="./src/assets/shield.svg" />
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body data-page="rules">
+    <!-- include: partials/header.html -->
+    <div class="layout">
+      <!-- include: partials/sidebar.html -->
+      <main id="main" class="content">
+        <!-- include: partials/querybar.html -->
+        <div class="page-head">
+          <p class="crumbs">Threat detection</p>
+          <h1>Rules</h1>
+          <p class="page-sub" data-experiment></p>
+        </div>
+
+        <div class="callout">
+          Signatures are regular expressions matched against every parameter value. They cover only
+          the <strong>canonical</strong> attack families (ADR-006): obfuscated and novel attacks
+          are, by design, what the statistical side has to catch. Extending the ruleset is task
+          B-01.
+        </div>
+        <div id="mode-note"></div>
+
+        <section class="kpis" id="kpis" aria-label="Key figures"></section>
+
+        <section class="panel" aria-labelledby="ruleset-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="ruleset-title">Ruleset</h2>
+            <span class="panel-meta">requests matched on the current test split</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data">
+              <thead>
+                <tr>
+                  <th scope="col">Rule</th>
+                  <th scope="col">Family</th>
+                  <th scope="col">Pattern</th>
+                  <th scope="col" class="num">Matched</th>
+                  <th scope="col" class="num">On attacks</th>
+                  <th scope="col" class="num">On legitimate requests</th>
+                </tr>
+              </thead>
+              <tbody id="rules-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- include: partials/footer.html -->
+      </main>
+    </div>
+    <script type="module" src="./src/pages/rules.js"></script>
+  </body>
+</html>

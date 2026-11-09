@@ -6,8 +6,9 @@
   "description": "Browser dashboard (Vite). Runs the whole detection + evaluation pipeline client-side so it can be hosted on GitHub Pages.",
   "dependencies": {
     "@anomaly-guard/core": "*",
+    "@anomaly-guard/evaluation": "*",
     "@anomaly-guard/traffic": "*",
-    "@anomaly-guard/evaluation": "*"
+    "chart.js": "^4.6.1"
   },
   "devDependencies": {
     "vite": "^6.0.0"

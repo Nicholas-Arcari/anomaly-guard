@@ -1,0 +1,38 @@
+<form class="querybar" method="get" data-experiment-form aria-label="Experiment settings">
+  <label>
+    Seed
+    <input
+      name="seed"
+      type="number"
+      inputmode="numeric"
+      min="0"
+      max="4294967295"
+      step="1"
+      value="42"
+      required
+    />
+  </label>
+  <label>
+    Detector
+    <select name="mode">
+      <option value="combined">Rules + statistics</option>
+      <option value="stats">Statistics only</option>
+      <option value="rules">Rules only</option>
+    </select>
+  </label>
+  <label
+    title="Alert when the anomaly score s = −log10(p) reaches this value: 1 ≈ p ≤ 0.1, 2 ≈ p ≤ 0.01, 3 ≈ p ≤ 0.001"
+  >
+    Threshold (−log₁₀ p)
+    <input name="threshold" type="number" min="0" max="50" step="0.1" value="1" required />
+  </label>
+  <label>
+    Attack share
+    <input name="prevalence" type="number" min="0" max="1" step="0.01" value="0.1" required />
+  </label>
+  <label>
+    Requests
+    <input name="size" type="number" min="100" max="5000" step="100" value="1000" required />
+  </label>
+  <button type="submit">Apply</button>
+</form>

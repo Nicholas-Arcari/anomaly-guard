@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Every simulated web request analysed by The Anomaly Guard, with its verdict, alert level and reason."
+    />
+    <title>Security events · The Anomaly Guard</title>
+    <link rel="icon" type="image/svg+xml" href="./src/assets/shield.svg" />
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body data-page="events">
+    <!-- include: partials/header.html -->
+    <div class="layout">
+      <!-- include: partials/sidebar.html -->
+      <main id="main" class="content">
+        <!-- include: partials/querybar.html -->
+        <div class="page-head">
+          <p class="crumbs">Threat detection</p>
+          <h1>Security events</h1>
+          <p class="page-sub" data-experiment></p>
+        </div>
+
+        <nav class="tabs" id="tabs" aria-label="Filter the events"></nav>
+
+        <section class="panel" aria-labelledby="events-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="events-title">Events</h2>
+            <span class="panel-meta" id="events-meta"></span>
+          </div>
+          <div class="table-wrap">
+            <table class="data">
+              <thead>
+                <tr>
+                  <th scope="col"><span class="visually-hidden">Details</span></th>
+                  <th scope="col" class="num">#</th>
+                  <th scope="col">Request</th>
+                  <th scope="col">Parameters</th>
+                  <th scope="col">Level</th>
+                  <th scope="col">Detected by</th>
+                  <th scope="col">Verdict</th>
+                  <th scope="col">Ground truth</th>
+                </tr>
+              </thead>
+              <tbody id="events-body"></tbody>
+            </table>
+          </div>
+          <div class="pager" id="pager"></div>
+        </section>
+
+        <p class="note">
+          The ground truth comes from the simulator: it records how each request was generated. A
+          real IDS never sees it; here it lets you check every verdict. Rows marked on the left are
+          detector mistakes. Open a row to see the request, the scores and the full record.
+        </p>
+
+        <!-- include: partials/footer.html -->
+      </main>
+    </div>
+    <script type="module" src="./src/pages/events.js"></script>
+  </body>
+</html>

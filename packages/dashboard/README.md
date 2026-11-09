@@ -1,51 +1,107 @@
 # @anomaly-guard/dashboard
 
-The browser dashboard (Vite). It runs the **whole pipeline client-side** — generate traffic,
-train on normal traffic, detect over the test set, compute metrics — so it can be hosted on
-**GitHub Pages** with no backend (ADR-003). Optionally it can also talk to the local
-`@anomaly-guard/server`.
+The project's console: a **multi-page**, SIEM-style web app (ADR-010) that runs the whole pipeline
+in the browser — generate the seeded traffic, learn normal behaviour from legitimate requests only,
+detect, evaluate — with no backend, so it is hosted on **GitHub Pages** (ADR-003).
 
-## Run (dev)
+**Live:** <https://nicholas-arcari.github.io/anomaly-guard/>. Showing it in a portfolio:
+[`docs/guides/team-guide.md`](../../docs/guides/team-guide.md).
 
-```bash
-npm run dev          # from the repo root → http://localhost:5173
+## Pages
+
+| Page               | File              | Shows                                                                                  | Theme panels still to add                             |
+| ------------------ | ----------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Overview           | `index.html`      | key figures, alerts by severity and level, what raised them, top signatures            | —                                                     |
+| Security events    | `events.html`     | every test request: verdict, level, reason, ground truth; filters and pages in the URL | —                                                     |
+| Rules              | `rules.html`      | the signature rules and how often each matched                                         | — (the ruleset itself is B-01)                        |
+| Statistical models | `models.html`     | the signals in the score; the learned model per endpoint and parameter                 | E-02: character classes (T1), lengths and scores (T2) |
+| Detection quality  | `evaluation.html` | confusion counts and error rates at the current settings                               | E-02: ROC (T3); E-06 (T3)                             |
+| Base rate          | `base-rate.html`  | Bayes and the base-rate fallacy, with a worked example                                 | E-03 (T4)                                             |
+| About              | `about.html`      | the project, the method, the themes                                                    | —                                                     |
+
+## How it is built
+
+```
+dashboard/
+├── *.html            one file per page
+├── partials/         header, settings bar, sidebar, footer — inserted by vite.config.js
+├── src/
+│   ├── styles.css    the whole look: tokens, layout, components, dark mode
+│   ├── shell.js      shared behaviour: settings from the URL, links, sidebar
+│   ├── state.js      settings ⇄ URL (pure, tested)
+│   ├── pipeline.js   dataset → train on legit traffic → detect → metrics (pure, tested)
+│   ├── levels.js     alert level 0–15 and severity (pure, tested)
+│   ├── dom.js        DOM helpers: data goes in as text, never as HTML
+│   ├── ui.js         KPI tile, level badge
+│   ├── charts.js     Chart.js setup and helpers
+│   ├── assets/       icon
+│   └── pages/        one script per page
+├── test/             node:test for state, levels, pipeline
+└── vite.config.js    page list, partials plugin, CSP
 ```
 
-## Build (static)
+- **Settings in the URL**: `?seed=42&mode=combined&threshold=1&prevalence=0.1&size=1000`. The same
+  URL always shows the same experiment, every internal link keeps the settings, and nothing is
+  kept in browser storage — so the demo also works inside a sandboxed iframe.
+- **Alert level** k means p ≤ 10^−k for a statistical alert; 15 means a signature matched. Severity:
+  low 0–1, medium 2–3, high 4–14, critical 15. For display only: the threshold decides the verdict.
+- **Security**: a strict Content Security Policy is added to every page at build time (no inline
+  scripts or styles), and payloads are inserted as text only.
+
+## Run, test, build
 
 ```bash
-npm run build        # → packages/dashboard/dist  (base: './', works at any path)
+npm run dev                                       # from the repo root → http://localhost:5173/
+npm test                                          # includes test/*.test.js of this package
+npm run build                                     # → packages/dashboard/dist
+npm run preview --workspace @anomaly-guard/dashboard   # serve the build → http://localhost:4173/
 ```
+
+Every page has its own address: `/events.html`, `/models.html`, …
+
+## Adding your theme's chart
+
+1. In the page's HTML, replace your placeholder (the `<div class="placeholder">` with your task
+   id) with a panel:
+
+   ```html
+   <section class="panel" aria-labelledby="roc-title">
+     <div class="panel-head"><h2 class="panel-title" id="roc-title">ROC curve</h2></div>
+     <div class="panel-body">
+       <div class="chart-box">
+         <canvas id="chart-roc" role="img" aria-label="ROC curve"></canvas>
+       </div>
+     </div>
+   </section>
+   ```
+
+2. In the page's script (`src/pages/<page>.js`), take the data from `runExperiment(state)` and draw
+   it: call `setupCharts()`, then `barChart(…)` or `new Chart(…)`. Register any Chart.js component
+   you need (e.g. `LineController`, `PointElement` for a curve) in `src/charts.js`.
+3. Keep the statistics in the pure packages (`core`, `evaluation`) with their tests: the page only
+   draws.
+4. No inline styles or scripts (the CSP blocks them); data goes into the page as text only (`h()`
+   in `src/dom.js`).
 
 ## Publish to GitHub Pages (manual — no CI, ADR-005)
 
-Pages needs a **public** repository on GitHub Free (a private one needs GitHub Pro, free with the
-Student Developer Pack); the published site is public either way. `dist/` is git-ignored, so it is
-pushed from a throwaway repository created inside it (`git subtree` cannot work on an ignored
-folder). From the repo root, in bash (Git Bash on Windows):
+The repository is public, so GitHub Free serves it. `dist/` is git-ignored, so it is pushed from a
+throwaway repository created inside it. From the repo root, on an up-to-date `main`, in bash (Git
+Bash on Windows):
 
 ```bash
-npm run build
+npm ci && npm test && npm run build
 cd packages/dashboard/dist
 touch .nojekyll                      # serve the files as they are, no Jekyll processing
 git init -q -b gh-pages
 git add -A
-git commit -q -m "deploy: dashboard"
+git commit -q -m "deploy: dashboard from $(git -C ../../.. rev-parse --short HEAD)"
 git push -f "$(git -C ../../.. remote get-url origin)" gh-pages
 rm -rf .git                          # drop the throwaway repository
 cd ../../..
 ```
 
-Then, once: **Settings → Pages → Build and deployment → Deploy from a branch → `gh-pages` /
-`(root)`**. The site appears at `https://<user>.github.io/anomaly-guard/` (`base: './'` makes the
-build work there). `gh-pages` keeps no history: each publish replaces it.
-
-(The usual one-line GitHub Actions deploy workflow is intentionally omitted; add it later with a
-follow-up ADR if the team wants automated publishing.)
-
-## Status
-
-Boots and shows the confusion matrix, FPR/FNR/F1 and a verdict table with the variant of each
-sample and the reason it was flagged (E-01). The threshold is on the −log10(p) scale (ADR-007).
-To do: character-distribution histograms, score distributions, ROC curve (Chart.js), the
-base-rate explainer, and a target-FPR control using the calibration split (E-02/E-03/E-06).
+GitHub Pages is already set to **Deploy from a branch → `gh-pages` / `(root)`**; the new version is
+online within a few minutes at <https://nicholas-arcari.github.io/anomaly-guard/>. `gh-pages` keeps
+no history: each publish replaces it. (An automated GitHub Actions deploy is intentionally
+omitted; add it with a follow-up ADR if the team wants it.)

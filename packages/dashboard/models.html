@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="The statistical model of normal traffic in The Anomaly Guard, learned per endpoint and parameter from legitimate requests only."
+    />
+    <title>Statistical models · The Anomaly Guard</title>
+    <link rel="icon" type="image/svg+xml" href="./src/assets/shield.svg" />
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body data-page="models">
+    <!-- include: partials/header.html -->
+    <div class="layout">
+      <!-- include: partials/sidebar.html -->
+      <main id="main" class="content">
+        <!-- include: partials/querybar.html -->
+        <div class="page-head">
+          <p class="crumbs">Anomaly detection</p>
+          <h1>Statistical models</h1>
+          <p class="page-sub" data-experiment></p>
+        </div>
+
+        <div class="callout">
+          The model learns what normal input looks like for each endpoint and parameter, from the
+          legitimate training split only — attacks never enter training (ADR-004). Each signal turns
+          how unusual a value is into a probability p and a score s = −log₁₀ p (ADR-007); the
+          request's score is the highest of them.
+        </div>
+
+        <section class="kpis" id="kpis" aria-label="Key figures"></section>
+
+        <section class="panel" aria-labelledby="signals-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="signals-title">Signals</h2>
+            <span class="panel-meta">task · theme</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data">
+              <thead>
+                <tr>
+                  <th scope="col">Signal</th>
+                  <th scope="col">Method</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Task</th>
+                </tr>
+              </thead>
+              <tbody id="signals-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="grid grid-2">
+          <div class="placeholder">
+            <span class="task">E-02 · T1</span>
+            <strong>Character classes: legitimate vs attack values</strong>
+            <span
+              >The share of each of the seven character classes in legitimate and in attack values —
+              the picture behind the chi-square score (C-03).</span
+            >
+          </div>
+          <div class="placeholder">
+            <span class="task">E-02 · T2</span>
+            <strong>Lengths and scores: legitimate vs attack</strong>
+            <span
+              >How value lengths and anomaly scores are distributed for legitimate and attack
+              requests, and where the threshold cuts them.</span
+            >
+          </div>
+        </div>
+
+        <section class="panel" aria-labelledby="pairs-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="pairs-title">Learned model per endpoint and parameter</h2>
+            <span class="panel-meta">length statistics and character-class shares</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data">
+              <thead>
+                <tr id="classes-head"></tr>
+              </thead>
+              <tbody id="pairs-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- include: partials/footer.html -->
+      </main>
+    </div>
+    <script type="module" src="./src/pages/models.js"></script>
+  </body>
+</html>

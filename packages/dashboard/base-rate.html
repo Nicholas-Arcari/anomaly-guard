@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="The base-rate fallacy: why rare attacks make even an accurate detector raise mostly false alarms."
+    />
+    <title>Base rate · The Anomaly Guard</title>
+    <link rel="icon" type="image/svg+xml" href="./src/assets/shield.svg" />
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body data-page="base-rate">
+    <!-- include: partials/header.html -->
+    <div class="layout">
+      <!-- include: partials/sidebar.html -->
+      <main id="main" class="content">
+        <!-- include: partials/querybar.html -->
+        <div class="page-head">
+          <p class="crumbs">Evaluation</p>
+          <h1>Base rate</h1>
+          <p class="page-sub" data-experiment></p>
+        </div>
+
+        <section class="panel" aria-labelledby="bayes-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="bayes-title">Why rare attacks are hard</h2>
+          </div>
+          <div class="panel-body prose">
+            <p>
+              When attacks are a small share of the traffic, even an accurate detector raises mostly
+              false alarms. Bayes' theorem gives the share of alarms that are real attacks, the
+              positive predictive value (PPV):
+            </p>
+            <p class="formula">
+              PPV = TPR · prevalence / (TPR · prevalence + FPR · (1 − prevalence))
+            </p>
+            <p>
+              Worked example: a detector that catches 99% of attacks (TPR = 0.99) and flags 1% of
+              legitimate requests (FPR = 0.01), on traffic where 1 request in 1,000 is an attack
+              (prevalence = 0.001), gives PPV ≈ 0.09. Only about 9% of its alarms are real attacks:
+              roughly ten false alarms for every true one.
+            </p>
+          </div>
+        </section>
+
+        <div class="placeholder">
+          <span class="task">E-03 · T4</span>
+          <strong>Interactive explainer: PPV against prevalence</strong>
+          <span
+            >The share of real attacks among the alarms as the attack rate changes, at the TPR and
+            FPR this detector actually reaches with the current settings.</span
+          >
+        </div>
+
+        <!-- include: partials/footer.html -->
+      </main>
+    </div>
+    <script type="module" src="./src/pages/static.js"></script>
+  </body>
+</html>

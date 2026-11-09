@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="How often The Anomaly Guard is right and wrong: attacks caught and missed, false alarms and error rates."
+    />
+    <title>Detection quality · The Anomaly Guard</title>
+    <link rel="icon" type="image/svg+xml" href="./src/assets/shield.svg" />
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body data-page="evaluation">
+    <!-- include: partials/header.html -->
+    <div class="layout">
+      <!-- include: partials/sidebar.html -->
+      <main id="main" class="content">
+        <!-- include: partials/querybar.html -->
+        <div class="page-head">
+          <p class="crumbs">Evaluation</p>
+          <h1>Detection quality</h1>
+          <p class="page-sub" data-experiment></p>
+        </div>
+
+        <div class="callout is-warning">
+          These figures come from one seed and a threshold set by hand in the settings bar. The
+          honest operating point is set on the legitimate-only calibration split at a target
+          false-positive rate (ADR-009, task D-06), and every rate needs a confidence interval over
+          at least 20 seeds (D-04, D-05). Accuracy is not shown on purpose: the classes are
+          imbalanced.
+        </div>
+
+        <h2 class="section-title">Outcomes on the test split</h2>
+        <section class="kpis" id="counts" aria-label="Confusion counts"></section>
+
+        <h2 class="section-title">Rates</h2>
+        <section class="kpis kpis-5" id="rates" aria-label="Error rates"></section>
+
+        <div class="grid grid-2">
+          <div class="placeholder">
+            <span class="task">E-02 · T3</span>
+            <strong>ROC curve and AUC</strong>
+            <span
+              >True-positive rate against false-positive rate for every threshold, for rules,
+              statistics and the combination, with the area under each curve (needs D-03).</span
+            >
+          </div>
+          <div class="placeholder">
+            <span class="task">E-06 · T3</span>
+            <strong>Calibrated threshold, confusion matrix and per-variant results</strong>
+            <span
+              >The threshold for a target false-positive rate from the calibration split (D-06), the
+              confusion matrix, and the results by variant — canonical, obfuscated and novel
+              attacks; typical and hard legitimate requests — with Wilson intervals (D-05).</span
+            >
+          </div>
+        </div>
+
+        <!-- include: partials/footer.html -->
+      </main>
+    </div>
+    <script type="module" src="./src/pages/evaluation.js"></script>
+  </body>
+</html>

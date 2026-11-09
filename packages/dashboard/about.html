@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="About The Anomaly Guard: the research question, the method and the statistical themes of the project."
+    />
+    <title>About · The Anomaly Guard</title>
+    <link rel="icon" type="image/svg+xml" href="./src/assets/shield.svg" />
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body data-page="about">
+    <!-- include: partials/header.html -->
+    <div class="layout">
+      <!-- include: partials/sidebar.html -->
+      <main id="main" class="content">
+        <div class="page-head">
+          <p class="crumbs">Project</p>
+          <h1>About The Anomaly Guard</h1>
+        </div>
+
+        <section class="panel">
+          <div class="panel-body prose">
+            <h2>What it is</h2>
+            <p>
+              An educational intrusion detection system, built as a group project for a master's
+              statistics course. It watches simulated web requests and decides, for each one,
+              whether it is normal or suspicious — in two ways. A
+              <strong>rule engine</strong> matches known attack signatures. A
+              <strong>statistical model</strong> learns what normal traffic looks like and flags
+              what departs from it, with no knowledge of the attacks.
+            </p>
+            <p>
+              <strong>Research question:</strong> how much can statistics catch without predefined
+              signatures, and how often does it get it wrong?
+            </p>
+
+            <h2>How it works</h2>
+            <ol>
+              <li>
+                <strong>Generate.</strong> A seeded simulator produces legitimate requests and
+                attacks: canonical, obfuscated and novel. The same seed always gives the same data.
+              </li>
+              <li>
+                <strong>Learn normal.</strong> The model is fitted on legitimate requests only, one
+                set of statistics per endpoint and parameter.
+              </li>
+              <li>
+                <strong>Detect.</strong> Each request gets a rule verdict and an anomaly score s =
+                −log₁₀ p; the threshold turns the score into an alert.
+              </li>
+              <li>
+                <strong>Evaluate.</strong> On a held-out test split: attacks caught and missed,
+                false alarms, error rates — and why rare attacks make false alarms dominate.
+              </li>
+            </ol>
+
+            <h2>The statistics, one theme per team member</h2>
+            <ul>
+              <li>
+                <strong>T1 · Character distributions and chi-square</strong> — is the mix of
+                characters in a value normal?
+              </li>
+              <li>
+                <strong>T2 · Lengths and outliers</strong> — is a value too long, or unusual in
+                combination?
+              </li>
+              <li>
+                <strong>T3 · Evaluation and uncertainty</strong> — how often is the detector wrong,
+                and how sure are we?
+              </li>
+              <li>
+                <strong>T4 · Probability and simulation</strong> — what does traffic look like, and
+                what happens when attacks are rare?
+              </li>
+            </ul>
+
+            <h2>Safety</h2>
+            <p>
+              Everything runs in your browser. The traffic is synthetic; the attack strings are
+              public textbook examples, measured and shown as text, never executed or sent anywhere.
+            </p>
+
+            <h2>Read more</h2>
+            <ul>
+              <li>
+                <a
+                  href="https://github.com/Nicholas-Arcari/anomaly-guard"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Source code and documentation ↗</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://github.com/Nicholas-Arcari/anomaly-guard/blob/main/docs/statistics/methods.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >The statistical methods ↗</a
+                >
+              </li>
+              <li>
+                Reference: C. Kruegel and G. Vigna, <em>Anomaly Detection of Web-based Attacks</em>,
+                ACM CCS 2003.
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- include: partials/footer.html -->
+      </main>
+    </div>
+    <script type="module" src="./src/pages/static.js"></script>
+  </body>
+</html>

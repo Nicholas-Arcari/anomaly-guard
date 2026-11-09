@@ -3,203 +3,119 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>The Anomaly Guard</title>
-    <style>
-      :root {
-        color-scheme: light dark;
-        --bg: #ffffff;
-        --fg: #1a1a1a;
-        --muted: #5c6370;
-        --card: #f6f7f9;
-        --border: #e2e5ea;
-        --accent: #2f6feb;
-        --attack: #c23b3b;
-        --legit: #2f8f4e;
-      }
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --bg: #15171c;
-          --fg: #e8eaed;
-          --muted: #9aa2ad;
-          --card: #1d2026;
-          --border: #2b2f37;
-          --accent: #5b8bff;
-          --attack: #e85d5d;
-          --legit: #4fc27a;
-        }
-      }
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        font:
-          15px/1.5 system-ui,
-          -apple-system,
-          Segoe UI,
-          Roboto,
-          sans-serif;
-        background: var(--bg);
-        color: var(--fg);
-      }
-      main {
-        max-width: 960px;
-        margin: 0 auto;
-        padding: 24px 16px 64px;
-      }
-      h1 {
-        font-size: 1.5rem;
-        margin: 0 0 4px;
-      }
-      .sub {
-        color: var(--muted);
-        margin: 0 0 24px;
-      }
-      .controls {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        align-items: end;
-        margin-bottom: 20px;
-      }
-      .controls label {
-        display: flex;
-        flex-direction: column;
-        font-size: 0.8rem;
-        color: var(--muted);
-        gap: 4px;
-      }
-      .controls input,
-      .controls select {
-        font: inherit;
-        padding: 6px 8px;
-        background: var(--card);
-        color: var(--fg);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-      }
-      button {
-        font: inherit;
-        font-weight: 600;
-        cursor: pointer;
-        padding: 7px 14px;
-        background: var(--accent);
-        color: #fff;
-        border: 0;
-        border-radius: 6px;
-      }
-      .cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-        gap: 12px;
-        margin-bottom: 24px;
-      }
-      .card {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 12px 14px;
-      }
-      .card .k {
-        color: var(--muted);
-        font-size: 0.78rem;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
-      }
-      .card .v {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-top: 2px;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.9rem;
-      }
-      th,
-      td {
-        text-align: left;
-        padding: 7px 8px;
-        border-bottom: 1px solid var(--border);
-        vertical-align: top;
-      }
-      th {
-        color: var(--muted);
-        font-weight: 600;
-      }
-      td.payload {
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        word-break: break-all;
-      }
-      .tag {
-        font-size: 0.75rem;
-        font-weight: 700;
-        padding: 1px 7px;
-        border-radius: 999px;
-      }
-      .tag.attack {
-        color: var(--attack);
-        border: 1px solid var(--attack);
-      }
-      .tag.legit {
-        color: var(--legit);
-        border: 1px solid var(--legit);
-      }
-      .wrong {
-        outline: 2px solid var(--attack);
-        outline-offset: -2px;
-      }
-      footer {
-        margin-top: 32px;
-        color: var(--muted);
-        font-size: 0.82rem;
-      }
-      a {
-        color: var(--accent);
-      }
-    </style>
+    <meta
+      name="description"
+      content="The Anomaly Guard: an educational intrusion detection system that combines signatures with statistical anomaly detection on simulated web traffic."
+    />
+    <title>Overview · The Anomaly Guard</title>
+    <link rel="icon" type="image/svg+xml" href="./src/assets/shield.svg" />
+    <link rel="stylesheet" href="./src/styles.css" />
   </head>
-  <body>
-    <main>
-      <h1>The Anomaly Guard</h1>
-      <p class="sub">
-        Educational IDS — rules + statistical anomaly detection, running entirely in your browser.
-      </p>
+  <body data-page="overview">
+    <!-- include: partials/header.html -->
+    <div class="layout">
+      <!-- include: partials/sidebar.html -->
+      <main id="main" class="content">
+        <!-- include: partials/querybar.html -->
+        <div class="page-head">
+          <p class="crumbs">Overview</p>
+          <h1>Overview</h1>
+          <p class="page-sub" data-experiment></p>
+        </div>
 
-      <div class="controls">
-        <label>Seed <input id="seed" type="number" value="42" /></label>
-        <label>Test size <input id="size" type="number" value="1000" /></label>
-        <label
-          >Attack prevalence
-          <input id="prevalence" type="number" value="0.1" step="0.01" min="0" max="1" />
-        </label>
-        <label title="Anomaly score = −log10(p): 1 ≈ p ≤ 0.1, 2 ≈ p ≤ 0.01, 3 ≈ p ≤ 0.001"
-          >Threshold (−log₁₀ p) <input id="threshold" type="number" value="1" step="0.1" min="0"
-        /></label>
-        <label
-          >Mode
-          <select id="mode">
-            <option value="combined">combined</option>
-            <option value="rules">rules only</option>
-            <option value="stats">stats only</option>
-          </select>
-        </label>
-        <button id="run">Run experiment</button>
-      </div>
+        <section class="kpis" id="kpis" aria-label="Key figures"></section>
 
-      <div class="cards" id="cards"></div>
+        <section class="panel" aria-labelledby="severity-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="severity-title">Alerts by severity</h2>
+            <span class="panel-meta">level k: p ≤ 10^−k · level 15: a signature matched</span>
+          </div>
+          <div class="panel-body"><div class="severity" id="severity"></div></div>
+        </section>
 
-      <h2 style="font-size: 1.05rem">Sample of results</h2>
-      <p class="sub" style="margin-top: -8px">
-        Rows outlined in red are detector mistakes (false positive or false negative).
-      </p>
-      <div style="overflow-x: auto"><table id="results"></table></div>
+        <div class="grid grid-3">
+          <section class="panel" aria-labelledby="levels-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="levels-title">Alerts by level</h2>
+              <span class="panel-meta">0–14 statistics · 15 signature</span>
+            </div>
+            <div class="panel-body">
+              <div class="chart-box">
+                <canvas
+                  id="chart-levels"
+                  role="img"
+                  aria-label="Number of alerts per alert level"
+                ></canvas>
+              </div>
+            </div>
+          </section>
+          <section class="panel" aria-labelledby="source-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="source-title">What raised the alerts</h2>
+            </div>
+            <div class="panel-body">
+              <div class="chart-box">
+                <canvas
+                  id="chart-source"
+                  role="img"
+                  aria-label="Alerts raised by a signature, by the statistical score, or by both"
+                ></canvas>
+              </div>
+            </div>
+          </section>
+          <section class="panel" aria-labelledby="rules-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="rules-title">Top signatures</h2>
+              <span class="panel-meta">requests matched</span>
+            </div>
+            <div class="panel-body">
+              <div class="chart-box">
+                <canvas
+                  id="chart-rules"
+                  role="img"
+                  aria-label="Rules that matched the most requests"
+                ></canvas>
+              </div>
+            </div>
+          </section>
+        </div>
 
-      <footer>
-        This is a simulation: all traffic is generated locally and no payload is ever executed or
-        sent. Baseline detector — the chi-square test and ROC are still stubs (see the backlog).
-      </footer>
-    </main>
-    <script type="module" src="./src/main.js"></script>
+        <h2 class="section-title">Modules</h2>
+        <div class="grid grid-3">
+          <a class="module" href="./events.html" data-keep-state>
+            <h3>Security events</h3>
+            <p>Every analysed request with its verdict, alert level and the reason behind it.</p>
+          </a>
+          <a class="module" href="./rules.html" data-keep-state>
+            <h3>Rules</h3>
+            <p>
+              The signature engine: its patterns, the families they cover and how often each fired.
+            </p>
+          </a>
+          <a class="module" href="./models.html" data-keep-state>
+            <h3>Statistical models</h3>
+            <p>
+              What "normal" looks like per endpoint and parameter, learned from legitimate traffic
+              only.
+            </p>
+          </a>
+          <a class="module" href="./evaluation.html" data-keep-state>
+            <h3>Detection quality</h3>
+            <p>Attacks caught and missed, false alarms, and the error rates behind them.</p>
+          </a>
+          <a class="module" href="./base-rate.html" data-keep-state>
+            <h3>Base rate</h3>
+            <p>Why a 1% false-positive rate can still bury the real attacks under false alarms.</p>
+          </a>
+          <a class="module" href="./about.html" data-keep-state>
+            <h3>About the project</h3>
+            <p>The research question, the method, and how the work is split.</p>
+          </a>
+        </div>
+
+        <!-- include: partials/footer.html -->
+      </main>
+    </div>
+    <script type="module" src="./src/pages/overview.js"></script>
   </body>
 </html>
