@@ -1,9 +1,14 @@
 # Task prompt: one template for any AI assistant
 
-The same prompt for every task and every tool: Claude Code, an editor agent that reads the
-repository (GitHub Copilot agent mode, Codex — [`AGENTS.md`](../../AGENTS.md) sends them to
-[`CLAUDE.md`](../../CLAUDE.md)), or a chat assistant such as claude.ai. You fill in three things by
-hand. Nothing in the project requires an AI assistant: without one, §5 applies.
+The same prompt for every task, in two versions, with a few things to fill in by hand (§1):
+
+- **§2** for an assistant that reads the repository and runs commands: Claude Code, or an editor
+  agent such as GitHub Copilot agent mode or Codex ([`AGENTS.md`](../../AGENTS.md) sends them to
+  [`CLAUDE.md`](../../CLAUDE.md));
+- **§3** for a chat without access to the repository: claude.ai without Claude Code, or any other
+  chat assistant.
+
+Nothing in the project requires an AI assistant: without one, §5 applies.
 
 Three rules, whatever the tool:
 
@@ -52,26 +57,55 @@ Explain every statistical choice in plain words: I must be able to defend all of
 exam.
 ```
 
-## 3. The same prompt for a chat assistant
+## 3. The prompt — for a chat assistant (claude.ai, without Claude Code)
 
-A chat (claude.ai, or any other) cannot read the repository or run commands. Give it the files:
+A chat cannot read the repository or run commands, so you give it the files and you run the
+commands.
 
-- **Once:** on claude.ai, create a Project and add `CLAUDE.md`, `docs/statistics/methods.md`,
-  `docs/planning/backlog.md` and ADR-006 to ADR-010 (`docs/development/adr/`) as project
-  knowledge, so you do not attach them every time. Elsewhere, attach them to the conversation.
-- **For each task:** attach the source and test files listed for it in §4.
+**Once, on claude.ai:** create a Project (for example "Anomaly Guard") and add these files of the
+repository as project knowledge, so you never attach them again: `CLAUDE.md`,
+`docs/statistics/methods.md`, `docs/planning/backlog.md`, and ADR-006 to ADR-010 from
+`docs/development/adr/`. Download them from GitHub, or take them from your clone. Update them in
+the Project when they change on `main`. With another chat assistant, attach them to the
+conversation instead.
 
-Use the prompt of §2 with these three steps in place of steps 1, 3 and 5:
+**For each task:** start a new conversation in the Project, attach the source and test files
+listed for the task in §4, and paste this prompt, filled in as in §1:
 
 ```text
-1. The attached files are the rules (CLAUDE.md) and the code for task <TASK>: follow the rules.
-3. Give me whole files, not fragments, so that I can replace them as they are.
-5. You cannot run commands: I will run npm test, npm run lint and npm run format:check and
-   paste you the output. Fix until they pass.
+I am working on task <TASK> of The Anomaly Guard, theme <THEME>:
+"<TASK ROW>"
+
+You cannot read the repository or run commands: the project knowledge holds the rules
+(CLAUDE.md), the methods, the backlog and the ADRs; the attached files are the code and tests
+for this task. Follow CLAUDE.md.
+
+1. Read CLAUDE.md, the task's row and checklist in the backlog, the ADRs and the methods.md
+   sections it cites, and the attached files. If you need a file I have not attached, ask me
+   for it by its path instead of guessing its content.
+2. Before writing code, give me a plan in at most 10 lines: the functions and formulas, the
+   tests with their known-answer values, and anything in the spec that is ambiguous. Wait for
+   my OK.
+3. Give me whole files, not fragments, each with its path, so that I can replace them as they
+   are. Change only what this task needs.
+4. Write the tests together with the code: known answers, edge cases, and monotonicity where
+   it applies.
+5. I will run npm test, npm run lint and npm run format:check and paste you the output: fix
+   until they pass.
+6. Give me the updated row of the task in docs/planning/backlog.md, and the methods.md
+   changes if the method changed.
+7. Finish with: the branch name feat/<task in lowercase>-<SHORT-NAME>, the commit message
+   (Conventional Commits), a pull-request description that follows
+   .github/pull_request_template.md, and five lines for my report chapter on what was done and
+   which statistics it uses.
+
+Explain every statistical choice in plain words: I must be able to defend all of it at the
+exam.
 ```
 
-You then create the branch, copy the files in, run the checks and open the pull request yourself
-([team guide](team-guide.md) §1.5).
+Then, in your clone: create the branch, copy the files in, run the checks, commit and open the
+pull request ([team guide](team-guide.md) §1.5). For B-01, do not add
+`traffic/src/generators.js` to the Project or the conversation (§4).
 
 ## 4. Files for each task
 
