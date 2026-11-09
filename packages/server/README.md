@@ -18,7 +18,10 @@ npm run dev:server        # from the repo root
 ## Endpoints
 
 - `GET /health` → `{ status: 'ok', trainedOn }`
-- `POST /ingest` with an `AgRequest` body → the detector verdict:
+- `POST /ingest` with an `AgRequest` body (values already URL-decoded, ADR-006) and optional
+  `threshold` (−log10 p scale, default 1 until B-02 calibrates it) and `mode` → the detector
+  verdict. A rule hit in `combined` mode scores `"Infinity"` (JSON has no infinity); an invalid
+  mode or threshold returns HTTP 400.
 
 ```bash
 curl -s http://127.0.0.1:3100/ingest \
@@ -30,4 +33,5 @@ curl -s http://127.0.0.1:3100/ingest \
 ## Status
 
 Starter: trains the statistical model on normal traffic at startup and exposes `/ingest` and
-`/health`. To do: a verdict stream for the dashboard and request logging (B-03).
+`/health`. To do: a threshold calibrated on legit-only traffic at startup (B-02, needs D-06), a
+verdict stream for the dashboard and request logging (B-03).
