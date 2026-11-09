@@ -48,4 +48,8 @@ Vite builds the dashboard with `base: './'` so the static bundle works at any Pa
 ### Actions
 
 - [x] Keep `core`/`traffic`/`evaluation` free of runtime APIs (standards §2.2).
-- [ ] Document the manual Pages publish (`npm run build` → push `dist/` to `gh-pages`).
+- [x] Document the manual Pages publish (`npm run build` → push `dist/` to `gh-pages`): see
+      `packages/dashboard/README.md`. `dist/` is git-ignored, so it is pushed from a throwaway
+      repository inside `dist/`, not with `git subtree`.
+- Note: GitHub Pages needs a **public** repository on GitHub Free (a private one needs GitHub Pro,
+  free with the Student Developer Pack). The published site is public either way.

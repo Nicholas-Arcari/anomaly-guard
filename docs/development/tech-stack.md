@@ -39,11 +39,14 @@
 | Component            | Choice                                          | Status            | Notes                                              |
 | -------------------- | ----------------------------------------------- | ----------------- | -------------------------------------------------- |
 | Feature extraction   | hand-written, pure JS                           | In use (scaffold) | request → numeric record                           |
-| Entropy & histograms | hand-written                                    | In use            | Shannon entropy, byte histogram, char-class counts |
+| Entropy & histograms | hand-written                                    | In use            | Shannon entropy, seven character classes (ADR-008) |
 | Rule engine          | regex / keyword, hand-written                   | Decided           | public attack signatures as data                   |
-| Chi-square test      | hand-written                                    | Decided           | character-distribution test (Kruegel & Vigna 2003) |
-| Confidence intervals | hand-written                                    | Decided           | per-parameter length model                         |
+| Chi-square           | hand-written                                    | Decided           | smoothed score + dataset-level test (ADR-008)      |
+| Length model         | Chebyshev bound, hand-written                   | In use (baseline) | per (path, parameter); −log10(p) score (ADR-007)   |
 | Outlier detection    | z-score / IQR / MAD; Mahalanobis (multivariate) | Decided           | robust estimators where needed                     |
+
+`evaluation` also implements, by hand, the confidence intervals on the metrics (Wilson for rates,
+seeded bootstrap for AUC — ADR-009).
 
 No external statistics library in `core`: the methods are the learning objective, so we
 implement them. (If a reference implementation is wanted for cross-checking in _tests only_, that
@@ -65,10 +68,10 @@ is an ADR.)
 
 ## 6. Hosting
 
-| Component      | Choice                                                       | Status  | Notes                                                                                                            |
-| -------------- | ------------------------------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------- |
-| Static hosting | GitHub Pages                                                 | Decided | serves the `dashboard` build; no server runs there                                                               |
-| Publish        | manual `npm run build` + push `dist/` to a `gh-pages` branch | Decided | no CI auto-deploy (ADR-005); the usual one-line Actions workflow is intentionally omitted and can be added later |
+| Component      | Choice                                                       | Status  | Notes                                                                                                              |
+| -------------- | ------------------------------------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------ |
+| Static hosting | GitHub Pages                                                 | Decided | serves the `dashboard` build; no server runs there. Needs a public repo (or GitHub Pro); the site is always public |
+| Publish        | manual `npm run build` + push `dist/` to a `gh-pages` branch | Decided | no CI auto-deploy (ADR-005); the usual one-line Actions workflow is intentionally omitted and can be added later   |
 
 ## 7. Explicitly not used
 

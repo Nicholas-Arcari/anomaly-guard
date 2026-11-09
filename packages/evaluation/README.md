@@ -29,10 +29,16 @@ positivePredictiveValue(0.99, 0.01, 0.001); // ≈ 0.09
 **Always report** the confusion matrix and both FPR and FNR — never accuracy alone, because the
 classes are imbalanced (standards §3).
 
+Scores follow the common scale of ADR-007 (higher = more anomalous); in `combined` mode a rule hit
+scores `+Infinity`, which every function here must handle.
+
 ## Status
 
 Implemented: confusion matrix, precision/recall/F1/FPR/FNR, single-threshold evaluation, and the
-base-rate PPV helper. Stub: `rocCurve` + AUC (the threshold sweep — backlog D-03).
+base-rate PPV helper. Stub: `rocCurve` + AUC (D-03). Planned: `thresholdAtFpr` — the threshold
+from the legit-only calibration split at a target FPR (D-06, ADR-009) — and confidence intervals
+on the metrics (D-05: Wilson for rates, seeded bootstrap for AUC). The experiment runner that
+uses all of this lives in a separate Node-only workspace, `packages/experiments` (D-04).
 
 ## Test
 

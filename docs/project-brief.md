@@ -46,6 +46,12 @@ architecture or method should also become an ADR.
   deliverable: confusion matrix, FPR/FNR, precision/recall/F1, ROC/AUC, and a base-rate
   discussion. (ADR-004)
 - **Statistical methods we will implement:** Shannon entropy and character-class features;
-  chi-square test on the character distribution (Kruegel & Vigna 2003); confidence intervals on
-  input lengths; outlier detection (z-score / IQR / MAD, and Mahalanobis for the multivariate
-  case). Details in [`statistics/methods.md`](statistics/methods.md).
+  chi-square on the character distribution (Kruegel & Vigna 2003) — as a per-request score and
+  as a formal test between normal and attack traffic (ADR-008); a Chebyshev / prediction-interval
+  bound on input lengths (ADR-007); outlier detection (z-score / IQR / MAD, and Mahalanobis for
+  the multivariate case). Details in [`statistics/methods.md`](statistics/methods.md).
+- **"confidence intervals"** → used where they are statistically correct: on the evaluation
+  metrics (Wilson interval on FPR/FNR/TPR, bootstrap on AUC). A "μ ± 3σ" band on one new value is
+  a prediction bound, not a confidence interval, and is named as such (ADR-007, ADR-009).
+- **"comparisons between normal and unusual traffic patterns"** → the dataset-level chi-square
+  test of homogeneity, and score distributions of normal vs. attack traffic (ROC).

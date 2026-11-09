@@ -43,15 +43,16 @@ Requires **Node.js ≥ 22**.
 - [`docs/project-brief.md`](docs/project-brief.md) — the assignment (defines scope)
 - [`docs/development/`](docs/development/README.md) — standards, structure, tech stack, ADRs
 - [`docs/statistics/methods.md`](docs/statistics/methods.md) — the maths (entropy, chi-square,
-  confidence intervals, outliers, ROC/AUC, base-rate / Bayes)
+  length bounds, outliers, ROC/AUC, confidence intervals on the metrics, base-rate / Bayes)
 - [`docs/planning/backlog.md`](docs/planning/backlog.md) — task board (who does what)
 
 ## Status
 
-Early scaffold. The toolchain runs and the evaluation + entropy primitives are implemented and
-tested; the pedagogically central pieces (chi-square test, confidence-interval model, outlier
-methods, ROC sweep, the full detector, the rich traffic generator) are specified stubs with a
-backlog task each — that is the group's work.
+Early scaffold. The toolchain runs; the evaluation and entropy primitives, the dataset contract
+(train / calibration / test, attacks injected into legitimate requests, variants) and a baseline
+detector are implemented and tested. The pedagogically central pieces (chi-square score, length
+and outlier models, threshold calibration, ROC sweep, confidence intervals, realistic traffic) are
+specified tasks in the backlog — that is the group's work. Methodology decisions: ADR-006 – ADR-009.
 
 ## Reference
 
