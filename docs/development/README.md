@@ -14,6 +14,7 @@ summary is [`../../CLAUDE.md`](../../CLAUDE.md); these files are the detail behi
 | [`adr/`](adr/README.md)                                | Architectural Decision Records: every significant choice, with context and consequences |
 | [`../statistics/methods.md`](../statistics/methods.md) | The statistical methods and their formulas                                              |
 | [`../planning/backlog.md`](../planning/backlog.md)     | Task board: tasks, dependencies, status, the work split by statistical theme            |
+| [`../guides/team-guide.md`](../guides/team-guide.md)   | Team guide: access, workflow, showing the live demo in a portfolio                      |
 | [`../project-brief.md`](../project-brief.md)           | The assignment — defines the scope                                                      |
 
 ## Rules of use

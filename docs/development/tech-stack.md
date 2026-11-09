@@ -60,11 +60,11 @@ is an ADR.)
 
 ## 5. `dashboard` — browser app (→ GitHub Pages)
 
-| Component          | Choice                  | Version | Status   | Notes                                                                      |
-| ------------------ | ----------------------- | ------- | -------- | -------------------------------------------------------------------------- |
-| Build / dev server | Vite                    | ^6.0    | Decided  | `base: './'` so it works at any Pages path                                 |
-| UI                 | vanilla JS + HTML + CSS | —       | Decided  | no framework for a small dashboard                                         |
-| Charts             | Chart.js                | ^4.4    | Proposed | ROC curve, histograms, confusion-matrix heatmap — add when building charts |
+| Component          | Choice                  | Version | Status  | Notes                                                                  |
+| ------------------ | ----------------------- | ------- | ------- | ---------------------------------------------------------------------- |
+| Build / dev server | Vite                    | ^6.0    | Decided | `base: './'` so it works at any Pages path                             |
+| UI                 | vanilla JS + HTML + CSS | —       | Decided | no framework; one HTML file per page, partials at build time (ADR-010) |
+| Charts             | Chart.js                | ^4.6    | In use  | registered per component in `src/charts.js`; theme charts reuse it     |
 
 ## 6. Hosting
 

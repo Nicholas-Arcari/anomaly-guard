@@ -51,7 +51,7 @@ any of the above, stop and ask — the answer is almost always "simulate it inst
 | Monorepo      | npm **workspaces** (`packages/*`)              | No Lerna/Turborepo/pnpm                                              |
 | Shared engine | `@anomaly-guard/core`                          | Pure JS — **no DOM, no Node-only APIs** (runs in browser _and_ Node) |
 | Server        | Express 4 (`@anomaly-guard/server`)            | Node-only; the "realistic" live monitor                              |
-| Dashboard     | Vite + vanilla JS (`@anomaly-guard/dashboard`) | Static build → **GitHub Pages**; charts: Chart.js (add when needed)  |
+| Dashboard     | Vite + vanilla JS (`@anomaly-guard/dashboard`) | Multi-page console (ADR-010) → **GitHub Pages**; charts: Chart.js    |
 | Tests         | `node:test` + `node --test`                    | Zero-config, no Jest/Vitest                                          |
 | Lint / format | ESLint 9 (flat) + Prettier                     | Local only; **no CI** by design (ADR-005)                            |
 | Hosting       | GitHub Pages (static)                          | The dashboard must run **fully client-side** (§5)                    |
@@ -187,7 +187,8 @@ grade.
 ## 10. Quick reference
 
 ```
-Repo root:            ~/Desktop/anomaly-guard
+Live demo:            https://nicholas-arcari.github.io/anomaly-guard/
+Team guide:           docs/guides/team-guide.md
 Assignment (scope):   docs/project-brief.md
 Dev rules:            docs/development/standards.md
 Structure + deps:     docs/development/project-structure.md

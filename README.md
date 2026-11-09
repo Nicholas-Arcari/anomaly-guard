@@ -11,19 +11,21 @@ from it), and then measures — honestly — how often each approach is right an
 **Research question:** how much can statistics catch _without_ pre-defined attack signatures,
 and at what cost in false positives and false negatives?
 
+**Live demo:** <https://nicholas-arcari.github.io/anomaly-guard/> — runs entirely in your browser.
+
 This is an **experiment**, not a production IDS. All traffic is synthetic and local — nothing is
 captured from a real network, and no payload is ever executed or sent anywhere. See the scope
 boundaries in [`CLAUDE.md`](CLAUDE.md) §2.
 
 ## What's inside
 
-| Workspace                                    | What it does                                                                                      |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| [`packages/core`](packages/core)             | Feature extraction, rule engine, statistical models, detector (pure JS, runs in browser and Node) |
-| [`packages/traffic`](packages/traffic)       | Seeded generator of legitimate + malicious requests, labelled dataset                             |
-| [`packages/evaluation`](packages/evaluation) | Confusion matrix, precision/recall/F1, FPR/FNR, ROC/AUC, base-rate                                |
-| [`packages/server`](packages/server)         | Express live monitor that ingests simulated requests                                              |
-| [`packages/dashboard`](packages/dashboard)   | Browser UI (Vite) — verdicts, histograms, ROC; builds static for GitHub Pages                     |
+| Workspace                                    | What it does                                                                                                   |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| [`packages/core`](packages/core)             | Feature extraction, rule engine, statistical models, detector (pure JS, runs in browser and Node)              |
+| [`packages/traffic`](packages/traffic)       | Seeded generator of legitimate + malicious requests, labelled dataset                                          |
+| [`packages/evaluation`](packages/evaluation) | Confusion matrix, precision/recall/F1, FPR/FNR, ROC/AUC, base-rate                                             |
+| [`packages/server`](packages/server)         | Express live monitor that ingests simulated requests                                                           |
+| [`packages/dashboard`](packages/dashboard)   | Multi-page, SIEM-style console (Vite) — events, rules, models, detection quality; static build on GitHub Pages |
 
 ## Quick start
 
@@ -45,6 +47,7 @@ Requires **Node.js ≥ 22**.
 - [`docs/statistics/methods.md`](docs/statistics/methods.md) — the maths (entropy, chi-square,
   length bounds, outliers, ROC/AUC, confidence intervals on the metrics, base-rate / Bayes)
 - [`docs/planning/backlog.md`](docs/planning/backlog.md) — task board (who does what)
+- [`docs/guides/team-guide.md`](docs/guides/team-guide.md) — team guide: access, workflow, showing the demo in a portfolio
 
 ## Status
 

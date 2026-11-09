@@ -23,7 +23,7 @@ anomaly-guard/
     ├── traffic/              # traffic generator + dataset
     ├── evaluation/           # metrics, ROC/AUC, base-rate
     ├── server/               # Express live monitor (Node only)
-    ├── dashboard/            # Vite browser app (→ GitHub Pages)
+    ├── dashboard/            # multi-page SIEM-style console (→ GitHub Pages, ADR-010)
     └── experiments/          # (planned, D-04) Node-only runner: seeds → results/
 ```
 
@@ -77,7 +77,7 @@ workspace: a theme spans several workspaces, and the **Themes** column says who 
 | `traffic`     | data             | T4                                                      | `createRng`, `makeLegitRequest`, `makeAttackRequest`, `buildDataset` (train / calibration / test)       |
 | `evaluation`  | evaluation       | T3 (T4 uses `positivePredictiveValue`)                  | `confusionMatrix`, `metrics`, `rocCurve`, `positivePredictiveValue`, `thresholdAtFpr`, `wilsonInterval` |
 | `server`      | live monitor     | T3 (B-02)                                               | Express app: `POST /ingest`, `GET /health`                                                              |
-| `dashboard`   | UI               | everyone: one chart per theme                           | browser app; GitHub Pages build                                                                         |
+| `dashboard`   | UI               | everyone: one chart per theme                           | seven HTML pages (ADR-010); GitHub Pages build; internals in its README                                 |
 | `experiments` | experiment runs  | T3                                                      | (planned, D-04) multi-seed runner writing `results/`                                                    |
 
 ## 3. `packages/core` internals

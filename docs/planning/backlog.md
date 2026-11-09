@@ -104,14 +104,15 @@
 
 ## 7. E — Dashboard & report (`packages/dashboard`, `docs/`)
 
-| ID   | Task                                                                                                                                                                     | Theme      | Depends on       | Status          |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | ---------------- | --------------- |
-| E-01 | Dashboard boot (Vite), runs the pipeline client-side, shows a verdict table with the variant                                                                             | shared     | F-05             | Done (baseline) |
-| E-02 | Charts (Chart.js), one per theme: character classes legit vs attack (T1), lengths and scores legit vs attack (T2), ROC (T3)                                              | T1, T2, T3 | E-01 (ROC: D-03) | Ready           |
-| E-03 | Base-rate explainer: PPV vs prevalence at the measured TPR and FPR (Bayes)                                                                                               | T4         | E-01, D-02       | Ready           |
-| E-04 | GitHub Pages publish (procedure in the dashboard README; needs a public repo or GitHub Pro)                                                                              | anyone     | E-01             | Ready           |
-| E-05 | Final report: one chapter per theme; introduction, method overview, conclusions and limitations written together; cite Kruegel & Vigna 2003; **per-member contribution** | all        | D-04             | Blocked         |
-| E-06 | Target-FPR control (threshold from the calibration split via D-06), confusion matrix and per-variant results table                                                       | T3         | D-06             | Blocked         |
+| ID   | Task                                                                                                                                                                                                               | Theme      | Depends on       | Status          |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | ---------------- | --------------- |
+| E-01 | Dashboard boot (Vite), runs the pipeline client-side, shows a verdict table with the variant                                                                                                                       | shared     | F-05             | Done (baseline) |
+| E-02 | Charts (Chart.js), one per theme, in the placeholders of the console (ADR-010): character classes legit vs attack (T1) and lengths and scores legit vs attack (T2) on `models.html`, ROC (T3) on `evaluation.html` | T1, T2, T3 | E-01 (ROC: D-03) | Ready           |
+| E-03 | Base-rate explainer on `base-rate.html`: PPV vs prevalence at the measured TPR and FPR (Bayes)                                                                                                                     | T4         | E-01, D-02       | Ready           |
+| E-04 | GitHub Pages publish: <https://nicholas-arcari.github.io/anomaly-guard/> (procedure in the dashboard README)                                                                                                       | anyone     | E-01             | Done            |
+| E-05 | Final report: one chapter per theme; introduction, method overview, conclusions and limitations written together; cite Kruegel & Vigna 2003; **per-member contribution**                                           | all        | D-04             | Blocked         |
+| E-06 | On `evaluation.html`: target-FPR control (threshold from the calibration split via D-06), confusion matrix and per-variant results table                                                                           | T3         | D-06             | Blocked         |
+| E-07 | Multi-page, SIEM-style console (ADR-010): seven pages, settings in the URL, alert levels, CSP, placeholders for the theme charts; team guide for access and portfolios (`docs/guides/team-guide.md`)               | shared     | E-01             | Done            |
 
 ## 8. Work split by statistical theme
 
@@ -153,7 +154,8 @@ contribution for the individual grade.
   geometric); seeded simulation and sampling; dataset design (splits, prevalence); Bayes'
   theorem, the base-rate fallacy, PPV vs prevalence.
 
-**Shared:** E-04 (Pages publish — anyone, once the repository is public) and E-05 (the report:
+**Shared:** E-04 (republishing the demo — anyone, procedure in the dashboard README), E-07 (the
+console each theme adds its chart to) and E-05 (the report:
 one chapter per theme; introduction, method overview and conclusions written together). B-03 is
 cut: it is engineering, not statistics, and the dashboard already runs the pipeline in the
 browser.

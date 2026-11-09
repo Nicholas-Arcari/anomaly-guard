@@ -16,6 +16,7 @@ consequences. ADRs are not deleted; a superseded one is marked `Superseded by AD
 | [ADR-007](ADR-007-per-parameter-models-and-score-scale.md)      | Per-(path, parameter) models and the common −log10(p) score scale       | Accepted                      | 2026-11-08 |
 | [ADR-008](ADR-008-character-classes-and-chi-square-score.md)    | Seven character classes; chi-square as a smoothed score                 | Accepted                      | 2026-11-08 |
 | [ADR-009](ADR-009-threshold-calibration-seeds-and-intervals.md) | Threshold calibration at a target FPR, repeated seeds, CIs              | Accepted                      | 2026-11-08 |
+| [ADR-010](ADR-010-multi-page-siem-style-dashboard.md)           | Dashboard as a multi-page, SIEM-style console                           | Accepted                      | 2026-11-09 |
 
 ## When to write an ADR
 

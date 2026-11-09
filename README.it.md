@@ -11,19 +11,21 @@ se ne discosta), e poi misura — onestamente — quanto ciascun approccio azzec
 **Domanda di ricerca:** quanto riesce a scoprire la statistica _senza_ firme di attacco
 predefinite, e a quale prezzo in falsi positivi e falsi negativi?
 
+**Demo online:** <https://nicholas-arcari.github.io/anomaly-guard/> — gira tutta nel browser.
+
 È un **esperimento**, non un IDS di produzione. Tutto il traffico è sintetico e locale: niente
 viene catturato da una rete reale e nessun payload viene mai eseguito o inviato da nessuna parte.
 I confini di perimetro sono in [`CLAUDE.md`](CLAUDE.md) §2.
 
 ## Cosa contiene
 
-| Workspace                                    | Cosa fa                                                                                                 |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| [`packages/core`](packages/core)             | Estrazione feature, motore a regole, modelli statistici, detector (JS puro, gira nel browser e in Node) |
-| [`packages/traffic`](packages/traffic)       | Generatore con seed di richieste legittime + malevole, dataset etichettato                              |
-| [`packages/evaluation`](packages/evaluation) | Matrice di confusione, precision/recall/F1, FPR/FNR, ROC/AUC, base-rate                                 |
-| [`packages/server`](packages/server)         | Monitor Express che riceve le richieste simulate                                                        |
-| [`packages/dashboard`](packages/dashboard)   | Interfaccia browser (Vite) — verdetti, istogrammi, ROC; build statica per GitHub Pages                  |
+| Workspace                                    | Cosa fa                                                                                                                     |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| [`packages/core`](packages/core)             | Estrazione feature, motore a regole, modelli statistici, detector (JS puro, gira nel browser e in Node)                     |
+| [`packages/traffic`](packages/traffic)       | Generatore con seed di richieste legittime + malevole, dataset etichettato                                                  |
+| [`packages/evaluation`](packages/evaluation) | Matrice di confusione, precision/recall/F1, FPR/FNR, ROC/AUC, base-rate                                                     |
+| [`packages/server`](packages/server)         | Monitor Express che riceve le richieste simulate                                                                            |
+| [`packages/dashboard`](packages/dashboard)   | Console multi-pagina in stile SIEM (Vite) — eventi, regole, modelli, qualità del rilevamento; build statica su GitHub Pages |
 
 ## Avvio rapido
 
@@ -48,6 +50,7 @@ La documentazione tecnica di dettaglio è in inglese (lingua di default del prog
   chi-quadro, limiti sulle lunghezze, outlier, ROC/AUC, intervalli di confidenza sulle metriche,
   base-rate / Bayes)
 - [`docs/planning/backlog.md`](docs/planning/backlog.md) — board dei task (chi fa cosa)
+- [`docs/guides/team-guide.md`](docs/guides/team-guide.md) — guida per il gruppo, in inglese: accesso al repository, flusso di lavoro, demo nel proprio portfolio
 
 ## Divisione del lavoro
 
