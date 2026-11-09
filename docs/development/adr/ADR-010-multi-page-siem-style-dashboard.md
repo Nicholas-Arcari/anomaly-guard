@@ -33,9 +33,11 @@ Constraints:
    the build. No templating dependency.
 3. **Experiment settings in the URL**: `?seed=42&mode=combined&threshold=1&prevalence=0.1&size=1000`
    (`src/state.js`). Every page rebuilds the same seeded experiment from them (same seed → same
-   data); links carry them; nothing uses browser storage. The settings form navigates from script,
-   so it also works in a sandboxed iframe without `allow-forms`. Page parameters (`show`, `page` on
-   the events page) are plain links too.
+   data); links carry them; nothing uses browser storage. The settings form applies on the Apply
+   button's click and navigates from script: in a sandboxed iframe without `allow-forms` the
+   browser cancels a form submission before the `submit` event even fires, but clicks and a page's
+   navigation of itself still work. Page parameters (`show`, `page` on the events page) are plain
+   links too.
 4. **SIEM-style interface, original design**: top bar, left navigation, settings bar, KPI tiles,
    severity strip, alert table with expandable details, colour-coded alert levels, light and dark
    themes. It borrows the layout conventions of SIEM consoles such as Wazuh, but uses no Wazuh

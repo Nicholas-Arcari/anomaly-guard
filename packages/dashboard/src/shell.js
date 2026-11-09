@@ -27,13 +27,20 @@ export function initShell() {
         field.value = String(value);
       }
     }
-    form.addEventListener('submit', (event) => {
-      // Navigate from script: a sandboxed iframe without `allow-forms` blocks form submission,
-      // but a page may always navigate itself. Page parameters (filter, page number) reset.
+    // Apply from the button's click, not from the form's `submit` event: in a sandboxed iframe
+    // without `allow-forms` the browser cancels the submission before `submit` is even fired,
+    // while a click still fires and a page may always navigate itself. Enter in a field also
+    // lands here (implicit submission clicks the default button). Page parameters (filter, page
+    // number) reset with a new experiment.
+    /** @param {Event} event */
+    const apply = (event) => {
       event.preventDefault();
+      if (!form.reportValidity()) return; // the sandbox also skips the browser's own checks
       const next = parseState(new URLSearchParams(/** @type {any} */ (new FormData(form))));
       location.search = toQuery(next);
-    });
+    };
+    form.querySelector('button[type="submit"]')?.addEventListener('click', apply);
+    form.addEventListener('submit', apply); // e.g. requestSubmit() outside a sandbox
   }
 
   const toggle = document.querySelector('[data-nav-toggle]');
