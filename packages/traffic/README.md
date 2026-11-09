@@ -18,24 +18,33 @@ import {
 ## Dataset
 
 ```js
-const { seed, train, test } = buildDataset({
+const { seed, train, calibration, test } = buildDataset({
   seed: 42,
   trainSize: 500,
+  calibrationSize: 1000,
   testSize: 500,
   prevalence: 0.1,
 });
-// train: legitimate-only samples (for fitting the statistical model — ADR-004)
-// test:  legit + attacks, with `prevalence` as the test-set base rate (for evaluation)
-// each sample: { request, label: 'legit' | 'attack', kind }
+// train:       legitimate only — fits the statistical model (ADR-004)
+// calibration: legitimate only — fixes the threshold at a target FPR (ADR-009)
+// test:        legit + attacks, with `prevalence` as the test-set base rate (for evaluation)
+// each sample: { request, label: 'legit' | 'attack', kind, variant }
 ```
 
-Record the `seed` with every reported result — it reproduces the whole dataset.
+An attack is a generated legitimate request with **one** parameter value replaced by a payload,
+so it has the same method, path and parameter names as normal traffic (ADR-006). `variant` says
+how the sample was made: legit `typical` | `hard`; attack `canonical` | `obfuscated` | `novel`.
+It drives evaluation only, never training.
+
+Record the `seed` and the git commit with every reported result — together they reproduce the
+whole dataset.
 
 ## Status
 
-Implemented: seeded RNG, baseline legit + attack generators, dataset builder with a
-train/test split. To do: richer legit traffic (A-02), broader and obfuscated/novel attacks
-(A-03/A-04), and the committed "hard cases" fixtures (A-05). See the backlog.
+Implemented: seeded RNG, baseline legit generators, attacks injected into legit requests with a
+variant, dataset builder with train / calibration / test splits. To do: realistic legit traffic
+(A-02), broader canonical attacks (A-03), obfuscated/novel attacks (A-04), and the "hard cases"
+in the test set (A-05). See the backlog for the checklists.
 
 ## Test
 

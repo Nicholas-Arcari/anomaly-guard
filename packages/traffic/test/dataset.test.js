@@ -24,10 +24,18 @@ test('createRng: next() stays in [0, 1)', () => {
   }
 });
 
-test('buildDataset: train split is legitimate only (no label leakage)', () => {
-  const { train } = buildDataset({ seed: 123, trainSize: 200, testSize: 100, prevalence: 0.2 });
+test('buildDataset: train and calibration splits are legitimate only (no label leakage)', () => {
+  const { train, calibration } = buildDataset({
+    seed: 123,
+    trainSize: 200,
+    calibrationSize: 150,
+    testSize: 100,
+    prevalence: 0.2,
+  });
   assert.equal(train.length, 200);
+  assert.equal(calibration.length, 150);
   assert.ok(train.every((s) => s.label === 'legit'));
+  assert.ok(calibration.every((s) => s.label === 'legit'));
 });
 
 test('buildDataset: test split honours the requested prevalence (base rate)', () => {
