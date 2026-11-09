@@ -1,24 +1,26 @@
 // Shannon entropy and character-distribution primitives.
-// Pure, runtime-agnostic (no DOM, no Node API). See docs/statistics/methods.md §0–§1.
+// Pure, runtime-agnostic (no DOM, no Node API). See docs/statistics/methods.md §0–§1 and ADR-008.
 
 /**
- * The fixed character classes used for distribution features and the chi-square test.
- * Keep this stable: changing it silently invalidates trained models and reported results
- * (standards §3, methods.md §0). Every character maps to exactly one class.
+ * The fixed character classes used for distribution features and the chi-square score
+ * (ADR-008, methods.md §0). Keep this stable: changing it silently invalidates trained models and
+ * reported results (standards §3). Every character maps to exactly one class.
  * @type {readonly string[]}
  */
 export const CHAR_CLASSES = Object.freeze([
   'lower', // a-z
   'upper', // A-Z
   'digit', // 0-9
-  'space', // a single space
-  'special', // characters that matter for injection, see SPECIAL_CHARS
-  'other', // anything else (control chars, punctuation not in SPECIAL_CHARS, non-ASCII)
+  'space', // a single space (U+0020)
+  'special', // injection metacharacters (SPECIAL_CHARS) and control characters
+  'punct', // the remaining printable ASCII punctuation: ! + , . : ? @ [ ] ^ _ ~
+  'nonascii', // any code point >= U+0080: accented letters, non-Latin scripts, emoji
 ]);
 
 /**
- * "Special" characters that frequently appear in injection payloads and rarely in normal
- * input. Documented in methods.md §0.
+ * Metacharacters of SQL, HTML/JS, shell and path syntax: frequent in injection payloads, rare in
+ * normal input. Control characters (U+0000–U+001F, U+007F) are classed as `special` too.
+ * Documented in methods.md §0.
  * @type {ReadonlySet<string>}
  */
 export const SPECIAL_CHARS = new Set([
@@ -39,11 +41,14 @@ export const SPECIAL_CHARS = new Set([
   '$',
   '{',
   '}',
+  '`',
+  '*',
+  '#',
 ]);
 
 /**
- * Classify a single character into one of CHAR_CLASSES.
- * @param {string} ch a single-character string
+ * Classify a single character (one code point) into one of CHAR_CLASSES.
+ * @param {string} ch a single-code-point string
  * @returns {string} one of CHAR_CLASSES
  */
 export function classifyChar(ch) {
@@ -51,8 +56,10 @@ export function classifyChar(ch) {
   if (ch >= 'A' && ch <= 'Z') return 'upper';
   if (ch >= '0' && ch <= '9') return 'digit';
   if (ch === ' ') return 'space';
-  if (SPECIAL_CHARS.has(ch)) return 'special';
-  return 'other';
+  const code = ch.codePointAt(0) ?? 0;
+  if (SPECIAL_CHARS.has(ch) || code < 0x20 || code === 0x7f) return 'special';
+  if (code < 0x80) return 'punct';
+  return 'nonascii';
 }
 
 /**
@@ -69,7 +76,8 @@ export function charClassCounts(input) {
 }
 
 /**
- * Histogram of raw symbols (characters) in a string: symbol -> count.
+ * Histogram of raw symbols (characters) in a string: symbol -> count. Used for the entropy; the
+ * binned histogram that feeds the models is charClassCounts.
  * @param {string} input
  * @returns {Map<string, number>}
  */

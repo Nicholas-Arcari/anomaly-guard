@@ -7,6 +7,9 @@ import { charClassCounts, shannonEntropy, CHAR_CLASSES } from '../stats/entropy.
 /**
  * A simulated request. `params` collects every user-controlled string value (from the query
  * string and the body) keyed by name — these are what an attacker controls and what we measure.
+ * Values are what the application sees AFTER the server's single URL-decoding pass, as Express
+ * gives `req.query` / `req.body` (ADR-006): a value that still contains `%xx` was double-encoded
+ * by the sender, which is what the `hasEncoding` feature flags.
  * @typedef {Object} AgRequest
  * @property {string} method   HTTP method, e.g. 'GET' | 'POST'
  * @property {string} path     URL path, e.g. '/search'
@@ -25,7 +28,7 @@ function hasPercentEncoding(s) {
  * Per-parameter features for one value.
  * @param {string} name
  * @param {string} value
- * @returns {{ name: string, length: number, entropy: number, classRatios: Record<string, number>, hasEncoding: boolean }}
+ * @returns {{ name: string, length: number, entropy: number, classCounts: Record<string, number>, classRatios: Record<string, number>, hasEncoding: boolean }}
  */
 export function paramFeatures(name, value) {
   const v = String(value);
@@ -38,6 +41,7 @@ export function paramFeatures(name, value) {
     name,
     length: len,
     entropy: shannonEntropy(v),
+    classCounts: counts, // observed counts O_i for the chi-square score (ADR-008)
     classRatios,
     hasEncoding: hasPercentEncoding(v),
   };
