@@ -22,7 +22,8 @@
     "format:check": "prettier --check .",
     "dev": "npm run dev --workspace @anomaly-guard/dashboard",
     "dev:server": "npm run start --workspace @anomaly-guard/server",
-    "build": "npm run build --workspace @anomaly-guard/dashboard"
+    "build": "npm run build --workspace @anomaly-guard/dashboard",
+    "team-setup": "node scripts/team-setup.js"
   },
   "devDependencies": {
     "eslint": "^9.13.0",

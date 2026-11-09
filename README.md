@@ -31,6 +31,7 @@ boundaries in [`CLAUDE.md`](CLAUDE.md) §2.
 
 ```bash
 npm install          # from the repo root — sets up all workspaces
+npm run team-setup   # once per computer: private e-mail, noreply commits (team guide)
 npm test             # run the test suite (node:test)
 npm run dev          # start the dashboard (Vite dev server)
 npm run dev:server   # start the Express monitor (separate terminal)

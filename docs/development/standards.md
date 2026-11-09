@@ -107,6 +107,9 @@
 
 - **MUST** — Branch `<type>/<id>-<short-desc>`; one task = one branch = one PR; update the
   backlog in the same PR.
+- **MUST** — Commit with your GitHub noreply address only: the repository is public.
+  `npm run team-setup` sets it up, makes your e-mail private on GitHub and turns on a
+  pre-commit check (`.githooks/pre-commit`) that refuses any other address.
 - **MUST** — Conventional Commits in English. Types: `feat`, `fix`, `docs`, `refactor`, `test`,
   `chore`, `build`, `perf`, `revert`.
 - **MUST** — No CI gate exists (ADR-005): run `npm test`, `npm run lint`, `npm run format:check`

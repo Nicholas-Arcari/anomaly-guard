@@ -28,6 +28,7 @@
 | F-03 | Shannon entropy + character-class counts (+ tests)                                                                                                                                                                                                         | F-02       | Done   |
 | F-04 | Fixed character classes (`CHAR_CLASSES`), documented — seven classes since ADR-008                                                                                                                                                                         | F-02       | Done   |
 | F-05 | Methodology foundations: ADR-006–009; attacks injected into legit requests, `variant`, `calibration` split; per-(path, param) model with one file per signal; −log10(p) scale; continuous detector score; purity lint; doc fixes; work split by theme (§8) | F-04       | Done   |
+| F-06 | Team setup, one command for everyone (`npm run team-setup`): e-mail private on GitHub, noreply commit identity, pre-commit check, invitation accepted                                                                                                      | F-01       | Done   |
 
 ## 3. A — Traffic & dataset (`packages/traffic`)
 

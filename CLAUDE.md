@@ -172,6 +172,7 @@ you skipped it, say so):
 
 ```bash
 npm install          # once, from the repo root (sets up all workspaces)
+npm run team-setup   # once per computer: noreply commit e-mail + pre-commit check
 npm test             # node:test across every package
 npm run lint         # eslint
 npm run format:check # prettier

@@ -29,43 +29,51 @@ repository's settings.
 Open <https://github.com/Nicholas-Arcari/anomaly-guard/invitations> (or the e-mail from GitHub) and
 accept. Until then you can read the public repository but not push to it.
 
-### 1.3 Set up your computer (once)
+### 1.3 Install the tools (once)
 
-You need Git, Node.js 22 or later and, to make login and pull requests easier, the GitHub CLI:
+You need Git, Node.js 22 or later and the GitHub CLI (`gh`), all free:
+
+| System               | Commands                                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Windows              | `winget install --id Git.Git` · `winget install --id OpenJS.NodeJS.LTS` · `winget install --id GitHub.cli` |
+| macOS                | `brew install git node gh`                                                                                 |
+| Debian, Ubuntu, Kali | `sudo apt install git gh`, and Node.js 22 from <https://nodejs.org> (the distribution's one may be older)  |
 
 ```bash
 git --version     # any recent version
 node --version    # v22 or later
-gh --version      # optional
+gh --version      # any recent version
 ```
 
-The repository is public, so your commit e-mail is public too. Keep your personal one out of it:
-
-1. GitHub → **Settings → Emails**: tick **Keep my email addresses private** and copy your
-   `…@users.noreply.github.com` address.
-2. Tell Git to use it:
-
-   ```bash
-   git config --global user.name "Your Name"
-   git config --global user.email "12345678+your-username@users.noreply.github.com"
-   ```
-
-Log in to GitHub from the terminal (once):
-
-```bash
-gh auth login        # GitHub.com → HTTPS → log in with a web browser
-gh auth setup-git    # git push over HTTPS then uses that login
-```
-
-### 1.4 Get the code and check that it works
+### 1.4 Get the code and run the setup (once per computer)
 
 ```bash
 git clone https://github.com/Nicholas-Arcari/anomaly-guard.git
 cd anomaly-guard
 npm install          # installs every workspace
+npm run team-setup   # your e-mail stays private (see below)
 npm test             # every test must pass
 npm run dev          # the dashboard at http://localhost:5173/ (Ctrl+C to stop)
 ```
+
+The repository is public, so every commit e-mail is public too. `npm run team-setup` is the same
+command for everyone, the owner included; it uses your own GitHub login, so it changes only your
+own account and your own git settings:
+
+1. it logs you in to GitHub through the browser (or adds the permission it needs to an existing
+   login);
+2. it makes your e-mail private on GitHub — the **Keep my email addresses private** setting;
+3. it makes git sign your commits with your GitHub noreply address
+   (`12345678+your-username@users.noreply.github.com`) instead of your personal e-mail, asking
+   before it changes your global git settings;
+4. it turns on a check in your clone that refuses any commit carrying another address;
+5. it accepts your invitation to the repository, if one is pending.
+
+It prints every change; `npm run team-setup -- --dry-run` only shows the plan. Running it again
+is safe. Everything it uses is free: the GitHub API is the same thing the website does, available
+to every account. One setting has no API: open <https://github.com/settings/emails> and tick
+**Block command line pushes that expose my email** — GitHub then refuses a push that would
+publish your personal address, whatever computer you use.
 
 Then read [`CLAUDE.md`](../../CLAUDE.md) (the rules, ten minutes), ADR-006 to ADR-010 in
 [`docs/development/adr/`](../development/adr/README.md), and your theme in

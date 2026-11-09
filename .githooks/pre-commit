@@ -1,0 +1,16 @@
+#!/bin/sh
+# The repository is public: refuse a commit whose author or committer e-mail is not a GitHub
+# noreply address, so nobody's personal e-mail ends up in the history. Turned on by
+# `npm run team-setup` (git config core.hooksPath .githooks); see docs/guides/team-guide.md.
+
+for who in GIT_AUTHOR_IDENT GIT_COMMITTER_IDENT; do
+  email=$(git var "$who" 2>/dev/null | sed -n 's/.*<\([^>]*\)>.*/\1/p')
+  case "$email" in
+    *@users.noreply.github.com) ;;
+    *)
+      echo "pre-commit: refused. This commit would carry the e-mail '$email'." >&2
+      echo "The repository is public: use your GitHub noreply address. Run: npm run team-setup" >&2
+      exit 1
+      ;;
+  esac
+done

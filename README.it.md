@@ -31,6 +31,7 @@ I confini di perimetro sono in [`CLAUDE.md`](CLAUDE.md) §2.
 
 ```bash
 npm install          # dalla radice del repo — configura tutti i workspace
+npm run team-setup   # una volta per computer: email privata, commit con l'indirizzo noreply
 npm test             # esegue i test (node:test)
 npm run dev          # avvia la dashboard (dev server Vite)
 npm run dev:server   # avvia il monitor Express (altro terminale)

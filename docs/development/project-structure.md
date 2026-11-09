@@ -13,6 +13,8 @@ anomaly-guard/
 ├── .editorconfig
 ├── .github/
 │   └── pull_request_template.md
+├── .githooks/pre-commit      # refuses commits without a GitHub noreply e-mail
+├── scripts/team-setup.js     # npm run team-setup: per-member setup (team guide §1.4)
 ├── docs/
 │   ├── project-brief.md      # The assignment (scope)
 │   ├── development/          # standards, project-structure, tech-stack, adr/
