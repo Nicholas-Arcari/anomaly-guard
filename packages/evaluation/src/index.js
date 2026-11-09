@@ -88,7 +88,8 @@ export function positivePredictiveValue(tpr, fpr, prevalence) {
  *
  * Implementation notes: sort by score descending, step the threshold through the unique scores,
  * accumulate TP/FP, and integrate with the trapezoid rule for AUC. AUC also equals the
- * probability that a random attack scores above a random legit sample.
+ * probability that a random attack scores above a random legit sample. Scores may be +Infinity
+ * (a rule hit in combined mode, ADR-007) and may tie: treat tied scores as one step.
  *
  * @param {Scored[]} scored
  * @returns {{ points: {fpr:number, tpr:number, threshold:number}[], auc:number }}

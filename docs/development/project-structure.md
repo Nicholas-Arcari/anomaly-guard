@@ -23,7 +23,8 @@ anomaly-guard/
     ├── traffic/              # traffic generator + dataset
     ├── evaluation/           # metrics, ROC/AUC, base-rate
     ├── server/               # Express live monitor (Node only)
-    └── dashboard/            # Vite browser app (→ GitHub Pages)
+    ├── dashboard/            # Vite browser app (→ GitHub Pages)
+    └── experiments/          # (planned, D-04) Node-only runner: seeds → results/
 ```
 
 **Rules:**
@@ -59,16 +60,22 @@ anomaly-guard/
   `evaluation` (it can run the whole pipeline client-side).
 - `evaluation` depends only on plain data (arrays of `{ label, score }`); keep it decoupled from
   `core` so it can score any detector.
+- `experiments` (planned, D-04 — ADR-009) is **Node-only**: it depends on `core`, `traffic` and
+  `evaluation`, runs the seeded experiments and may use `fs` to write `results/`. It is the only
+  place experiment code touches the file system, so the three pure packages stay pure.
+- Purity is enforced by ESLint (`eslint.config.js`): in `core`, `traffic` and `evaluation` `src/`,
+  browser globals, Node globals and modules, `fetch` and `Math.random` are errors.
 - A workspace **never** reaches into another workspace's `src/` internals — import from its
   package entry (`@anomaly-guard/<name>`).
 
-| Workspace    | Area             | Owner          | Key exports (planned)                                                       |
-| ------------ | ---------------- | -------------- | --------------------------------------------------------------------------- |
-| `core`       | detection engine | **C** + shared | `extractFeatures`, `RuleEngine`, `trainStatModel`, `scoreRequest`, `detect` |
-| `traffic`    | data             | **A**          | `createRng`, `makeLegitRequest`, `makeAttackRequest`, `buildDataset`        |
-| `evaluation` | evaluation       | **D**          | `confusionMatrix`, `metrics`, `rocCurve`, `auc`, `positivePredictiveValue`  |
-| `server`     | server/rules     | **B**          | Express app: `POST /ingest`, `GET /health`                                  |
-| `dashboard`  | UI + report      | **E**          | browser app; GitHub Pages build                                             |
+| Workspace     | Area             | Owner          | Key exports (planned)                                                                                   |
+| ------------- | ---------------- | -------------- | ------------------------------------------------------------------------------------------------------- |
+| `core`        | detection engine | **C** + shared | `extractFeatures`, `RuleEngine`, `trainStatModel`, `scoreRequest`, `paramKey`, `pToScore`, `detect`     |
+| `traffic`     | data             | **A**          | `createRng`, `makeLegitRequest`, `makeAttackRequest`, `buildDataset` (train / calibration / test)       |
+| `evaluation`  | evaluation       | **D**          | `confusionMatrix`, `metrics`, `rocCurve`, `positivePredictiveValue`, `thresholdAtFpr`, `wilsonInterval` |
+| `server`      | server/rules     | **B**          | Express app: `POST /ingest`, `GET /health`                                                              |
+| `dashboard`   | UI + report      | **E**          | browser app; GitHub Pages build                                                                         |
+| `experiments` | experiment runs  | **D**          | (planned, D-04) multi-seed runner writing `results/`                                                    |
 
 ## 3. `packages/core` internals
 
@@ -82,19 +89,25 @@ core/
 │   ├── rules/
 │   │   └── engine.js         # signature / regex rule engine
 │   ├── stats/
-│   │   ├── entropy.js        # Shannon entropy, byte histogram, char-class counts
-│   │   └── anomaly.js        # chi-square, confidence-interval model, outlier scores
+│   │   ├── entropy.js        # Shannon entropy, the seven character classes
+│   │   └── anomaly.js        # per-(path, param) model, length bound, chi-square, outliers
 │   └── detector/
 │       └── detect.js         # combine rule hits + stat scores → explained verdict
-└── test/
-    └── entropy.test.js
+└── test/                     # one file per area, so owners rarely edit the same file
+    ├── entropy.test.js
+    ├── features.test.js
+    ├── rules.test.js
+    ├── anomaly.test.js
+    └── detect.test.js
 ```
 
 - **`features/extract.js`** is the only place that reads the raw request shape. Everything
   downstream consumes the numeric record, so adding a feature is a one-file change.
-- **`stats/*`** functions are pure and return scores/p-values; thresholds are applied by callers.
-- **`detector/detect.js`** returns `{ verdict, reasons }` where `reasons` names the rule or
-  feature that fired — the dashboard needs this to explain a decision.
+- **`stats/*`** functions are pure and return scores on the `−log10(p)` scale (ADR-007);
+  thresholds are applied by callers.
+- **`detector/detect.js`** returns `{ verdict, score, reasons, … }`: one continuous score per mode
+  (so the ROC can sweep every configuration) and `reasons` naming the rule or signal that fired —
+  the dashboard needs this to explain a decision.
 
 ## 4. Runtime boundary (why `core` is pure)
 

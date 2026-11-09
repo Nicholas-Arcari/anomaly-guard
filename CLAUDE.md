@@ -83,8 +83,8 @@ contribution for the individual grade. Full tree + dependency rules:
 - **Train on normal only.** The statistical model is fitted on _legitimate_ traffic alone. The
   labelled test set is held out. **Never fit on the test set and never let labels leak into
   training** — that is the single most common way to fake a good result.
-- **Methods return a score, not a verdict.** Every detector (chi-square, confidence interval,
-  outlier) returns a numeric score (and, where relevant, a p-value), and the _threshold_ is
+- **Methods return a score, not a verdict.** Every statistical signal (chi-square, length bound,
+  outlier) returns `s = −log10(p)` (higher = more anomalous, ADR-007), and the _threshold_ is
   applied outside it. ROC needs to sweep that threshold, so a method that bakes in a hard
   yes/no destroys the analysis.
 - **`core` is runtime-agnostic.** No `window`, `document`, `fetch`, `fs`, `process`, `express`
@@ -95,12 +95,13 @@ contribution for the individual grade. Full tree + dependency rules:
   executes, requests, or writes them to a shell, a DOM, or a query. No real request leaves the
   machine.
 - **Reproducible experiments.** The traffic generator takes an explicit **seed**; same seed →
-  same dataset. Record the seed with every reported result. No unseeded `Math.random()` in the
-  generator or the experiments.
-- **Honest evaluation.** Always report the confusion matrix and both error rates (FPR _and_
-  FNR), not just accuracy — the classes are imbalanced, so accuracy alone lies. Keep the
-  "hard cases" fixtures: legitimate-but-weird (`O'Brien`, long free-text comments, non-Latin
-  text) for false positives; short/mimicry attacks (`1 OR 1=1`) for false negatives.
+  same dataset. Record the seed and git commit with every reported result. No unseeded
+  `Math.random()` in the generator or the experiments (ESLint enforces it in the pure packages).
+- **Honest evaluation.** Set the operating threshold on the legit-only calibration split at a
+  target FPR, never by looking at the test set (ADR-009). Always report the confusion matrix and
+  both error rates (FPR _and_ FNR), not just accuracy — the classes are imbalanced. Keep the "hard
+  cases": legitimate-but-weird (`O'Brien`, long free-text, non-Latin text) for false positives;
+  short/mimicry attacks (`1 OR 1=1`) for false negatives.
 - **No real data.** Datasets are synthetic. No real names, emails, credentials, IPs, or captured
   traffic in code, tests, or committed data.
 
@@ -109,21 +110,20 @@ contribution for the individual grade. Full tree + dependency rules:
 ## 6. Mandatory patterns
 
 - **Feature extraction** (`core/src/features`) turns one request into a flat record of numbers
-  (total length, per-parameter length, param count, character-class counts, byte histogram,
+  (total length, per-parameter length, param count, character-class counts and ratios,
   Shannon entropy, method, encoding flags). Detectors and the report consume _that record_,
   never the raw request, so a new feature is added in one place.
 - **Statistical model lifecycle:** `train(normalRequests) → model`, then
   `score(model, request) → number`. Training and scoring are separate calls (see the
-  train-on-normal rule). The model is a plain serialisable object (no closures over data).
+  train-on-normal rule). The model is a plain serialisable object, kept per (path, parameter).
 - **Detector** (`core/src/detector`) combines rule hits and statistical scores into a verdict
   **at a given threshold**, and returns _why_ (which rule, which feature, which score) so the
   dashboard can explain it.
-- **Dataset is labelled** (`traffic`): every generated request carries `{ request, label }` with
-  `label ∈ { 'legit', 'attack' }` and an attack `kind`. Labels drive evaluation only — never
-  training.
-- **Numbers:** character-distribution and entropy use a documented, fixed alphabet/binning
-  (see [`docs/statistics/methods.md`](docs/statistics/methods.md)); document it, don't improvise
-  per call.
+- **Dataset is labelled** (`traffic`): every sample is `{ request, label, kind, variant }`; an
+  attack is a legit request with one parameter value replaced by a payload (ADR-006). Labels and
+  variants drive evaluation only — never training.
+- **Numbers:** character distributions use the seven fixed `CHAR_CLASSES` (ADR-008, see
+  [`docs/statistics/methods.md`](docs/statistics/methods.md) §0); don't improvise per call.
 
 ---
 
@@ -133,13 +133,13 @@ contribution for the individual grade. Full tree + dependency rules:
 - **Never** report a single accuracy number for an imbalanced set — show the confusion matrix,
   FPR, FNR, and the ROC. Mention the **base-rate fallacy**: at a 0.1% attack rate even a 1% FPR
   drowns true attacks in false alarms (Bayes — worked in `methods.md`).
-- **Never** run a chi-square test with tiny expected counts: bin rare characters and apply the
-  documented correction (see `methods.md`), or the statistic is meaningless.
+- **Never** present the per-request chi-square p-value as a probability: with tiny expected
+  counts it is only a score (ADR-008). The valid test is the dataset-level one (`methods.md` §4b).
 - **Never** hardcode a decision threshold inside a scoring function (breaks the ROC sweep).
 - **Never** import a browser or Node API from `core` (breaks the GitHub Pages demo or the tests).
 - **Never** execute, request, or shell out a generated payload — it is a measurement subject.
 - **Never** use unseeded randomness in the generator or experiments (breaks reproducibility).
-- **Never** leave a `TODO` without a backlog id: `// TODO(C-03): implement Yates correction`.
+- **Never** leave a `TODO` without a backlog id: `// TODO(C-03): add the chi-square part`.
 - **Never** introduce a dependency that is not in `tech-stack.md` without an ADR.
 
 ---

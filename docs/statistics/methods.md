@@ -2,20 +2,35 @@
 
 The methods behind the detector, with just enough maths to implement and defend them. Each maps
 to a function in `packages/core/src/stats` or `packages/evaluation`. Cite Kruegel & Vigna,
-_Anomaly Detection of Web-based Attacks_ (CCS 2003) for the character-distribution idea.
+_Anomaly Detection of Web-based Attacks_ (CCS 2003) for the character-distribution and
+length-bound ideas. Decisions behind this page: ADR-004, ADR-006 – ADR-009.
 
 ## 0. Conventions
 
-- **Alphabet / binning.** Character-distribution features use a fixed, documented set of
-  character classes rather than 256 raw bytes, so counts stay stable and expected counts stay
-  large enough for the chi-square test. Default classes: lowercase `a–z`, uppercase `A–Z`, digits
-  `0–9`, space, and a set of "special" characters that matter for injection
-  (`' " ; < > ( ) = - / \ % & | $ { }`), with everything else in `other`. The exact set lives in
-  `core` as `DEFAULT_ALPHABET` and must not change silently.
-- **Train vs. test.** Every model is fitted on legitimate traffic only; the test set is held out
-  (ADR-004).
-- **Score, not verdict.** Each function returns a number (and a p-value where relevant); the
-  threshold is applied by the caller.
+- **Character classes (ADR-008).** Character-distribution features use a fixed set of seven
+  classes rather than raw bytes. The exact set lives in `core` as `CHAR_CLASSES` and
+  `SPECIAL_CHARS` (`stats/entropy.js`) and must not change without an ADR.
+
+  | Class      | Characters                                                                                                           |
+  | ---------- | -------------------------------------------------------------------------------------------------------------------- |
+  | `lower`    | `a–z`                                                                                                                |
+  | `upper`    | `A–Z`                                                                                                                |
+  | `digit`    | `0–9`                                                                                                                |
+  | `space`    | the space character (U+0020)                                                                                         |
+  | `special`  | injection metacharacters ``' " ; < > ( ) = - / \ % & \| $ { } ` * #`` and control characters (U+0000–U+001F, U+007F) |
+  | `punct`    | the other printable ASCII punctuation `! + , . : ? @ [ ] ^ _ ~`                                                      |
+  | `nonascii` | any code point ≥ U+0080: accented letters, non-Latin scripts, emoji                                                  |
+
+- **Per-(path, parameter) models (ADR-007).** Statistics are learned per pair, keyed
+  `paramKey(path, name)` → e.g. `/search?q`, as Kruegel & Vigna model each (program, attribute).
+- **Decoded values (ADR-006).** Parameter values are what the application sees after one
+  URL-decoding pass; leftover `%xx` means double encoding.
+- **Train vs. test.** Every model is fitted on legitimate traffic only; thresholds are set on a
+  separate legitimate-only calibration split; the test set is held out (ADR-004, ADR-009).
+- **One score scale (ADR-007).** Every statistical signal estimates the tail probability `p` of
+  the observed value under the normal model and reports `s = −log10(p)`: 0 = unremarkable,
+  1 = p ≤ 0.1, 2 = p ≤ 0.01, 3 = p ≤ 0.001. Higher is always more anomalous. The threshold is
+  applied by the caller (`pToScore` in `stats/anomaly.js`).
 
 ## 1. Shannon entropy — `stats/entropy.js` (implemented)
 
@@ -32,65 +47,106 @@ normal text well — it is one feature among many, and a good illustration of wh
 **Known-answer test:** a string using `k` symbols each equally often has `H = log2(k)` (e.g.
 `"0101..."` → 1 bit).
 
-## 2. Feature extraction — `features/extract.js`
+## 2. Feature extraction — `features/extract.js` (implemented)
 
 Each request becomes a flat numeric record: total length, per-parameter length, parameter count,
-counts (and ratios) per character class, byte/char histogram, Shannon entropy, HTTP method
-(encoded), and an encoding flag (`%xx` present). Downstream code consumes this record only.
+character-class counts and ratios (the binned histogram of §0, per parameter and over the whole
+payload), Shannon entropy, HTTP method (encoded), and an encoding flag (`%xx` still present after
+decoding). Downstream code consumes this record only. The raw character histogram
+(`charHistogram`) is used for the entropy, not as a feature.
 
-## 3. Confidence interval on length — `stats/anomaly.js` (stub C-04)
+## 3. Length model — Chebyshev bound (baseline implemented, C-04)
 
-From legitimate traffic, estimate the mean `μ` and standard deviation `σ` of a parameter's
-length. Flag a request whose length falls outside
-
-```
-μ ± z · σ        (e.g. z = 3 ≈ 99.7% for a roughly normal quantity)
-```
-
-Report the per-parameter **z-score** `(x − μ)/σ` as the anomaly score (caller thresholds it).
-Lengths are often right-skewed, so consider a log transform or the robust version (§5). Example:
-a search `q` that is normally 10–30 chars arriving at 800 is far outside the interval.
-
-## 4. Chi-square test on the character distribution — `stats/anomaly.js` (stub C-03)
-
-The heart of the project (Kruegel & Vigna 2003). Learn the **expected** relative frequency of
-each character class from legitimate traffic. For a new string with observed counts `O_i` and
-expected counts `E_i = N · p_i` (N = string length):
+From legitimate traffic, estimate the mean `μ` and standard deviation `σ` of each pair's value
+length. For a new value `x`, `z = |x − μ| / σ`. **Chebyshev's inequality** holds for any
+distribution:
 
 ```
-χ² = Σ (O_i − E_i)² / E_i          df = (#classes − 1)
+P(|X − μ| ≥ z·σ) ≤ 1 / z²      →   p = min(1, 1/z²),   s = −log10(p)
 ```
 
-A SQL injection has far more `'`, `=`, `-`, `(` than normal text, so `O_i` diverges from `E_i`,
-`χ²` is large and the p-value small → anomaly. The function returns `{ chiSquare, df, pValue }`;
-the caller thresholds the p-value.
+so a value 10 standard deviations away has `p ≤ 0.01` and score 2. It needs no normality, which
+matters because lengths are right-skewed and bounded below by 0; it is the bound Kruegel & Vigna
+use for lengths. Example: a search `q` that is normally 10–30 characters arriving at 800 is far
+outside.
 
-**Must-dos (standards §3):**
+**This is not a confidence interval.** A confidence interval bounds a _parameter_ (here the mean
+`μ`) and shrinks as `1/√n`. To judge one _new value_ we need a bound on a new observation: the
+Chebyshev bound above or, if lengths were normal, the **prediction interval**
 
-- **Low expected counts** make the statistic unreliable: merge rare classes or require
-  `E_i ≥ 5`; otherwise the test is not reported.
-- With few classes, apply a continuity (Yates) correction where appropriate; state `df`.
-- The p-value comes from the chi-square survival function at `df`; implement or tabulate it (no
-  external stats lib in `core` — tech-stack §3).
+```
+μ̂ ± t(n−1, 1−α/2) · s · √(1 + 1/n)
+```
 
-## 5. Outlier detection — `stats/anomaly.js` (stub C-05)
+C-04 may compare the two (on raw and log-transformed lengths) and must decide how to treat pairs
+never seen in training (Kruegel & Vigna treat an unexpected attribute as anomalous in itself).
+Confidence intervals proper are used on the evaluation metrics (§6).
 
-Per-feature, robust alternatives to §3:
+## 4. Chi-square score on the character distribution (stub C-03)
+
+The heart of the project (Kruegel & Vigna 2003, adapted in ADR-008). For one parameter value with
+`N` characters, `O_i` is the observed count of class `i`. The expected probabilities come from the
+pair's training counts `c_i` (total `C`, `k = 7` classes) with **Laplace smoothing**, so no
+expected count is ever zero:
+
+```
+p̂_i = (c_i + 1) / (C + k)        E_i = N · p̂_i
+χ²  = Σ (O_i − E_i)² / E_i        df = k − 1 = 6
+```
+
+A SQL injection has far more `'`, `=`, `-`, `(` than normal text, so `O_i` diverges from `E_i`
+and `χ²` is large. If the pair is unseen, use the pooled counts (`model.classCounts`). Return the
+most anomalous parameter: `{ chiSquare, df, pValue, score, param }`.
+
+**It is a score, not a test.** On short strings the expected counts of the rare classes are far
+below 5 (on the baseline data `E(special) ≈ 0.0035 · N`), so the asymptotic chi-square
+distribution does not hold and the p-value is only **nominal**. We do not merge classes — the rare
+classes _are_ the signal — and we do not apply Yates' correction (it is for `df = 1`). The p-value
+is used through `s = −log10(p)`, which is monotone in `χ²`, and the threshold is calibrated on
+legitimate data (§6), so the miscalibration does not bias the error rates. Do not present the
+per-request p-value as a probability in the report.
+
+**Survival function for df = 6** (no stats library in `core`): for an even `df = 2m`,
+
+```
+P(χ²(2m) > x) = e^(−x/2) · Σ_{j=0}^{m−1} (x/2)^j / j!
+p(χ², df = 6) = e^(−x/2) · (1 + x/2 + x²/8)
+```
+
+Compute `ln p = −x/2 + ln(1 + x/2 + x²/8)` and `s = −ln p / ln 10`, so very large `χ²` values do
+not underflow to `p = 0`. **Known answers:** `χ² = 12.592, df = 6 → p ≈ 0.05`;
+`χ² = 16.812 → p ≈ 0.01`. Other `df` (for example after merging cells in §4b) need the general
+regularised incomplete gamma function `Q(df/2, x/2)` (series and continued fraction).
+
+### 4b. The formal test: legitimate vs attack traffic (C-08)
+
+For the report, compare the class distribution of **all** legitimate test values with that of
+**all** attack test values in a 7 × 2 contingency table (test of homogeneity, `df = (7 − 1)(2 − 1)
+= 6`). Counts are in the thousands, so `E_i ≥ 5` holds and this is a valid test. If a cell still
+falls below 5, merge that class with a neighbour **for this test only** and state it.
+
+## 5. Outlier detection (stub C-05)
+
+Per-feature, robust alternatives to §3. Each must end as a tail probability and a score on the
+§0 scale:
 
 - **z-score:** `(x − μ)/σ` — simple, but `μ`/`σ` are themselves sensitive to outliers.
-- **IQR / box-plot:** flag `x < Q1 − 1.5·IQR` or `x > Q3 + 1.5·IQR`.
-- **MAD (robust):** `MAD = median(|x − median(x)|)`; robust score `0.6745 · (x − median)/MAD`.
+- **IQR / box-plot:** flag `x < Q1 − 1.5·IQR` or `x > Q3 + 1.5·IQR`; as a score, use the distance
+  beyond the fence in IQR units with a documented mapping to `p`.
+- **MAD (robust):** `MAD = median(|x − median(x)|)`; robust score `0.6745 · (x − median)/MAD`,
+  then a Chebyshev or normal tail as in §3.
 
-**Multivariate — Mahalanobis distance:** across several features with covariance `S`,
+**Multivariate — Mahalanobis distance:** across `d` features with covariance `S`,
 
 ```
-D²(x) = (x − μ)ᵀ · S⁻¹ · (x − μ)
+D²(x) = (x − μ)ᵀ · S⁻¹ · (x − μ)      p ≈ P(χ²(d) > D²)
 ```
 
-`D²` is approximately chi-square distributed with `df = #features`, giving a principled
-threshold. Use it when single features overlap but the _combination_ is unusual.
+Use it when single features overlap but the _combination_ is unusual. Drop constant features or
+regularise (`S + λI`) before inverting: on legitimate traffic some features never vary, which
+makes `S` singular.
 
-## 6. Evaluation — `packages/evaluation` (metrics implemented; ROC/AUC stub D-03)
+## 6. Evaluation — `packages/evaluation` (metrics implemented; D-03, D-05, D-06 stubs)
 
 From a labelled test set and scores, at a threshold `t` (predict "attack" when `score ≥ t`):
 
@@ -102,10 +158,29 @@ confusion matrix:            metrics:
                                      F1 = 2·P·R / (P + R)
 ```
 
-- **ROC / AUC:** sweep `t` over all scores, plot TPR vs. FPR; AUC is the area under it (and the
-  probability that a random attack scores above a random legit request). This is the
-  threshold-independent summary the brief wants (D-03).
-- Always show the confusion matrix and both error rates, never accuracy alone (standards §3).
+- **Choosing `t` (ADR-009, D-06).** Never by looking at test results. Score the legitimate-only
+  **calibration** split and take the smallest `t` that at most a fraction `targetFpr` of those
+  scores reach (e.g. 1%: with 1000 calibration requests, about the 10th highest score). Then
+  score the test set once with that `t`.
+- **ROC / AUC (D-03):** sweep `t` over all scores, plot TPR vs. FPR; AUC is the area under it (and
+  the probability that a random attack scores above a random legit request). In `combined` mode a
+  rule hit scores `+Infinity`; in `rules` mode the score is binary, so its ROC is a single point.
+- **Confidence intervals (D-05).** Error rates are proportions estimated from finite samples, so
+  report them with a 95% **Wilson score interval** (`z = 1.96`, `p̂ = x/n`):
+
+  ```
+  centre = (p̂ + z²/(2n)) / (1 + z²/n)
+  half   = z / (1 + z²/n) · √( p̂(1 − p̂)/n + z²/(4n²) )
+  ```
+
+  Example: 0 false positives out of 900 legitimate requests gives FPR ∈ [0, 0.43%], not "zero".
+  For AUC use a seeded bootstrap (resample the test set, ~1000 times, 2.5th–97.5th percentile).
+
+- **Repeated seeds (ADR-009).** Run every configuration on at least 20 seeds and report the mean
+  and spread; record seeds, git commit, split sizes, prevalence and target FPR.
+- Always show the confusion matrix and both error rates, never accuracy alone (standards §3), and
+  break the results down by `variant` (canonical / obfuscated / novel attacks, typical / hard
+  legitimate requests).
 
 ## 7. Base-rate fallacy — `positivePredictiveValue` (implemented)
 

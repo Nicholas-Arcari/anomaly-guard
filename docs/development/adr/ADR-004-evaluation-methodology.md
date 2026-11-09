@@ -1,7 +1,8 @@
 # ADR-004: Evaluation methodology
 
 **Date:** 2026-10-19
-**Status:** Accepted
+**Status:** Accepted — refined by [ADR-009](ADR-009-threshold-calibration-seeds-and-intervals.md)
+(calibration split, threshold at a target FPR, repeated seeds, confidence intervals)
 **Author:** The Anomaly Guard team
 
 ## Context
@@ -53,4 +54,4 @@ fitting on the test set, or reporting accuracy on an imbalanced set.
 
 - [x] `confusionMatrix`, `metrics`, `positivePredictiveValue` implemented in `evaluation`.
 - [ ] `rocCurve` + `auc` (threshold sweep) — backlog D-03.
-- [ ] Experiment scripts that fix a seed and write `results/`.
+- [ ] Experiment scripts that fix a seed and write `results/` — backlog D-04, see ADR-009.

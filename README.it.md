@@ -45,7 +45,8 @@ La documentazione tecnica di dettaglio è in inglese (lingua di default del prog
 - [`docs/project-brief.md`](docs/project-brief.md) — la consegna (definisce il perimetro)
 - [`docs/development/`](docs/development/README.md) — standard, struttura, stack, ADR
 - [`docs/statistics/methods.md`](docs/statistics/methods.md) — la matematica (entropia,
-  chi-quadro, intervalli di confidenza, outlier, ROC/AUC, base-rate / Bayes)
+  chi-quadro, limiti sulle lunghezze, outlier, ROC/AUC, intervalli di confidenza sulle metriche,
+  base-rate / Bayes)
 - [`docs/planning/backlog.md`](docs/planning/backlog.md) — board dei task (chi fa cosa)
 
 ## Divisione del lavoro (gruppo 3–5)
