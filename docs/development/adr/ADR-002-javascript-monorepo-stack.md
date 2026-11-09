@@ -1,7 +1,9 @@
 # ADR-002: JavaScript + npm workspaces monorepo
 
 **Date:** 2026-10-19
-**Status:** Accepted
+**Status:** Accepted — ownership amended: the work is split by statistical theme, not by
+workspace ([backlog](../../planning/backlog.md) §8), so "one workspace per member" below no longer
+holds
 **Author:** The Anomaly Guard team
 
 ## Context

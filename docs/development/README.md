@@ -9,11 +9,11 @@ summary is [`../../CLAUDE.md`](../../CLAUDE.md); these files are the detail behi
 | Document                                               | Contents                                                                                |
 | ------------------------------------------------------ | --------------------------------------------------------------------------------------- |
 | [`standards.md`](standards.md)                         | Code, statistics, data, git and documentation standards (MUST / SHOULD)                 |
-| [`project-structure.md`](project-structure.md)         | Repository layout, workspaces, dependency rules, module ownership                       |
+| [`project-structure.md`](project-structure.md)         | Repository layout, workspaces, dependency rules, which theme works where                |
 | [`tech-stack.md`](tech-stack.md)                       | The closed list of allowed technologies, with versions and rationale                    |
 | [`adr/`](adr/README.md)                                | Architectural Decision Records: every significant choice, with context and consequences |
 | [`../statistics/methods.md`](../statistics/methods.md) | The statistical methods and their formulas                                              |
-| [`../planning/backlog.md`](../planning/backlog.md)     | Task board: tasks, dependencies, status, who is on what                                 |
+| [`../planning/backlog.md`](../planning/backlog.md)     | Task board: tasks, dependencies, status, the work split by statistical theme            |
 | [`../project-brief.md`](../project-brief.md)           | The assignment — defines the scope                                                      |
 
 ## Rules of use
