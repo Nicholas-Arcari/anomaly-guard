@@ -67,9 +67,10 @@ function renderTable(rows) {
         `<tr class="${correct ? '' : 'wrong'}">` +
         `<td>${escapeHtml(s.request.path)}</td>` +
         `<td class="payload">${escapeHtml(payload)}</td>` +
-        `<td><span class="tag ${s.label}">${s.label}</span></td>` +
+        `<td><span class="tag ${s.label}">${s.label}</span> ${escapeHtml(s.variant)}</td>` +
         `<td><span class="tag ${result.verdict}">${result.verdict}</span></td>` +
-        `<td>${result.score.toFixed(2)}</td>` +
+        // A rule hit in combined mode scores +Infinity (ADR-007).
+        `<td>${Number.isFinite(result.score) ? result.score.toFixed(2) : '∞'}</td>` +
         `<td>${escapeHtml(why)}</td>` +
         '</tr>'
       );
