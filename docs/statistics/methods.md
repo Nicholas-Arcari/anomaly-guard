@@ -30,7 +30,7 @@ length-bound ideas. Decisions behind this page: ADR-004, ADR-006 – ADR-009.
 - **One score scale (ADR-007).** Every statistical signal estimates the tail probability `p` of
   the observed value under the normal model and reports `s = −log10(p)`: 0 = unremarkable,
   1 = p ≤ 0.1, 2 = p ≤ 0.01, 3 = p ≤ 0.001. Higher is always more anomalous. The threshold is
-  applied by the caller (`pToScore` in `stats/anomaly.js`).
+  applied by the caller (`pToScore` in `stats/model.js`).
 
 ## 1. Shannon entropy — `stats/entropy.js` (implemented)
 
@@ -55,7 +55,7 @@ payload), Shannon entropy, HTTP method (encoded), and an encoding flag (`%xx` st
 decoding). Downstream code consumes this record only. The raw character histogram
 (`charHistogram`) is used for the entropy, not as a feature.
 
-## 3. Length model — Chebyshev bound (baseline implemented, C-04)
+## 3. Length model — `stats/length.js` (Chebyshev baseline implemented, C-04)
 
 From legitimate traffic, estimate the mean `μ` and standard deviation `σ` of each pair's value
 length. For a new value `x`, `z = |x − μ| / σ`. **Chebyshev's inequality** holds for any
@@ -82,7 +82,7 @@ C-04 may compare the two (on raw and log-transformed lengths) and must decide ho
 never seen in training (Kruegel & Vigna treat an unexpected attribute as anomalous in itself).
 Confidence intervals proper are used on the evaluation metrics (§6).
 
-## 4. Chi-square score on the character distribution (stub C-03)
+## 4. Chi-square score on the character distribution — `stats/chisquare.js` (stub, C-03)
 
 The heart of the project (Kruegel & Vigna 2003, adapted in ADR-008). For one parameter value with
 `N` characters, `O_i` is the observed count of class `i`. The expected probabilities come from the
@@ -125,7 +125,7 @@ For the report, compare the class distribution of **all** legitimate test values
 = 6`). Counts are in the thousands, so `E_i ≥ 5` holds and this is a valid test. If a cell still
 falls below 5, merge that class with a neighbour **for this test only** and state it.
 
-## 5. Outlier detection (stub C-05)
+## 5. Outlier detection — `stats/outliers.js` (to create, C-05)
 
 Per-feature, robust alternatives to §3. Each must end as a tail probability and a score on the
 §0 scale:

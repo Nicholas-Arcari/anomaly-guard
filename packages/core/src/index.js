@@ -13,14 +13,9 @@ export { extractFeatures, paramFeatures } from './features/extract.js';
 
 export { RuleEngine, DEFAULT_RULES } from './rules/engine.js';
 
-export {
-  trainStatModel,
-  scoreRequest,
-  paramKey,
-  pToScore,
-  lengthZScore,
-  lengthScore,
-  chiSquareScore, // stub — backlog C-03
-} from './stats/anomaly.js';
+export { trainStatModel, paramKey, pToScore } from './stats/model.js';
+export { lengthZScore, lengthScore } from './stats/length.js';
+export { chiSquareScore } from './stats/chisquare.js'; // stub — backlog C-03
+export { scoreRequest } from './stats/anomaly.js';
 
 export { detect } from './detector/detect.js';

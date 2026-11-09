@@ -22,7 +22,7 @@ const MODES = ['rules', 'stats', 'combined'];
  * @param {import('../features/extract.js').AgRequest} request
  * @param {Object} opts
  * @param {import('../rules/engine.js').RuleEngine} [opts.ruleEngine]  required for 'rules'/'combined'
- * @param {import('../stats/anomaly.js').StatModel} [opts.model]       required for 'stats'/'combined'
+ * @param {import('../stats/model.js').StatModel} [opts.model]       required for 'stats'/'combined'
  * @param {number} [opts.threshold]  on the −log10(p) scale; required for 'stats'/'combined'. No
  *   default on purpose: it is calibrated on legitimate data and swept by the ROC (ADR-009).
  * @param {DetectMode} [opts.mode='combined']
