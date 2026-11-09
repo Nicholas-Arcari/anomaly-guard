@@ -88,15 +88,21 @@ core/
 │   │   └── extract.js        # request → flat numeric feature record
 │   ├── rules/
 │   │   └── engine.js         # signature / regex rule engine
-│   ├── stats/
+│   ├── stats/                # one file per signal
 │   │   ├── entropy.js        # Shannon entropy, the seven character classes
-│   │   └── anomaly.js        # per-(path, param) model, length bound, chi-square, outliers
+│   │   ├── model.js          # per-(path, param) model, paramKey, pToScore (−log10 p)
+│   │   ├── length.js         # length signal: Chebyshev bound (C-04)
+│   │   ├── chisquare.js      # character-distribution signal: chi-square (C-03, C-08)
+│   │   ├── outliers.js       # (to create, C-05) IQR / MAD, Mahalanobis
+│   │   └── anomaly.js        # scoreRequest: the max of the signals (C-06)
 │   └── detector/
 │       └── detect.js         # combine rule hits + stat scores → explained verdict
-└── test/                     # one file per area, so owners rarely edit the same file
+└── test/                     # one test file per source file, so people rarely edit the same file
     ├── entropy.test.js
     ├── features.test.js
     ├── rules.test.js
+    ├── model.test.js
+    ├── length.test.js        # chisquare.test.js comes with C-03
     ├── anomaly.test.js
     └── detect.test.js
 ```
@@ -104,7 +110,8 @@ core/
 - **`features/extract.js`** is the only place that reads the raw request shape. Everything
   downstream consumes the numeric record, so adding a feature is a one-file change.
 - **`stats/*`** functions are pure and return scores on the `−log10(p)` scale (ADR-007);
-  thresholds are applied by callers.
+  thresholds are applied by callers. Each signal imports the shared conventions from `model.js`,
+  and only `anomaly.js` imports the signals, so there are no import cycles.
 - **`detector/detect.js`** returns `{ verdict, score, reasons, … }`: one continuous score per mode
   (so the ROC can sweep every configuration) and `reasons` naming the rule or signal that fired —
   the dashboard needs this to explain a decision.
