@@ -15,7 +15,7 @@ predefinite, e a quale prezzo in falsi positivi e falsi negativi?
 
 È un **esperimento**, non un IDS di produzione. Tutto il traffico è sintetico e locale: niente
 viene catturato da una rete reale e nessun payload viene mai eseguito o inviato da nessuna parte.
-I confini di perimetro sono in [`CLAUDE.md`](CLAUDE.md) §2.
+I confini di perimetro sono in [`AGENTS.md`](AGENTS.md) §2.
 
 ## Cosa contiene
 
@@ -44,7 +44,7 @@ Richiede **Node.js ≥ 22**.
 
 La documentazione tecnica di dettaglio è in inglese (lingua di default del progetto):
 
-- [`CLAUDE.md`](CLAUDE.md) — manuale per chi contribuisce e per gli assistenti AI (inizia da qui)
+- [`AGENTS.md`](AGENTS.md) — manuale per chi contribuisce e per gli assistenti AI (inizia da qui)
 - [`docs/project-brief.md`](docs/project-brief.md) — la consegna (definisce il perimetro)
 - [`docs/development/`](docs/development/README.md) — standard, struttura, stack, ADR
 - [`docs/statistics/methods.md`](docs/statistics/methods.md) — la matematica (entropia,

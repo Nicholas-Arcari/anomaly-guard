@@ -6,7 +6,7 @@
 
 ## Context
 
-`standards.md` §3, `methods.md` §4 and `CLAUDE.md` §7 required merging classes until every
+`standards.md` §3, `methods.md` §4 and `AGENTS.md` §7 required merging classes until every
 expected count was `E_i ≥ 5`, and not reporting the test otherwise. On the baseline data the
 expected share of `special` characters is about 0.35%: a value would need about 1400 characters to
 reach `E ≥ 5`, and `upper` had `E = 0` (a division by zero). Merging the rare classes removes
@@ -65,6 +65,6 @@ non-Latin letters, so a legitimate Greek comment and a shell payload looked alik
 
 ### Actions
 
-- [x] `CHAR_CLASSES` / `SPECIAL_CHARS` updated; `CLAUDE.md` §7, standards §3 and methods.md §0/§4
+- [x] `CHAR_CLASSES` / `SPECIAL_CHARS` updated; `AGENTS.md` §7, standards §3 and methods.md §0/§4
       aligned.
 - [ ] C-03 implements the score; C-08 the dataset-level test of homogeneity.

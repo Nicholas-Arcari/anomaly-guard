@@ -2,7 +2,7 @@
 
 > This is the assignment as given by the instructor. It **defines the scope**: anything not
 > described here is out of scope and must be agreed before it is built (see
-> [`CLAUDE.md`](../CLAUDE.md) §2 and [`development/standards.md`](development/standards.md) §1).
+> [`AGENTS.md`](../AGENTS.md) §2 and [`development/standards.md`](development/standards.md) §1).
 > Do not edit the quoted text; add our interpretation under "Notes" at the bottom.
 
 ## Assignment (verbatim)
@@ -28,7 +28,7 @@
 > assessment will be taken into account.
 
 Groups of 3–5 students. Every member documents their own contribution — see the ownership map in
-[`CLAUDE.md`](../CLAUDE.md) §4 and the task board in [`planning/backlog.md`](planning/backlog.md).
+[`AGENTS.md`](../AGENTS.md) §4 and the task board in [`planning/backlog.md`](planning/backlog.md).
 
 ## Notes (our interpretation — editable)
 

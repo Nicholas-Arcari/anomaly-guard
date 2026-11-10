@@ -92,7 +92,7 @@
   its Content Security Policy strict: no inline scripts or styles (ADR-010).
 - **MUST** — The Express server binds to `localhost` only and exists to demonstrate the
   ingest/analyse loop locally; it is not exposed.
-- **MUST** — If a task appears to need any of the above, stop and ask (brief, `CLAUDE.md` §2).
+- **MUST** — If a task appears to need any of the above, stop and ask (brief, `AGENTS.md` §2).
 
 ## 6. Tests
 

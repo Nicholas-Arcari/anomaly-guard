@@ -79,7 +79,7 @@ to every account. One setting has no API: open <https://github.com/settings/emai
 **Block command line pushes that expose my email** — GitHub then refuses a push that would
 publish your personal address, whatever computer you use.
 
-Then read [`CLAUDE.md`](../../CLAUDE.md) (the rules, ten minutes), ADR-006 to ADR-010 in
+Then read [`AGENTS.md`](../../AGENTS.md) (the rules, ten minutes), ADR-006 to ADR-010 in
 [`docs/development/adr/`](../development/adr/README.md), and your theme in
 [`docs/planning/backlog.md`](../planning/backlog.md) §8 — and write your name next to it.
 

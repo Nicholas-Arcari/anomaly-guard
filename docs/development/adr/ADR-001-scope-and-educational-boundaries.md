@@ -52,5 +52,5 @@ If a task appears to need anything beyond this, the contributor stops and asks.
 
 ### Actions
 
-- [x] State the boundary in `CLAUDE.md` §2 and `standards.md` §5.
+- [x] State the boundary in `AGENTS.md` §2 and `standards.md` §5.
 - [ ] Keep a committed fixture set of "hard cases" for tests.

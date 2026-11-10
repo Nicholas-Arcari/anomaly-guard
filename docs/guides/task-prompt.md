@@ -3,8 +3,8 @@
 The same prompt for every task, in two versions, with a few things to fill in by hand (§1):
 
 - **§2** for an assistant that reads the repository and runs commands: Claude Code, or an editor
-  agent such as GitHub Copilot agent mode or Codex ([`AGENTS.md`](../../AGENTS.md) sends them to
-  [`CLAUDE.md`](../../CLAUDE.md));
+  agent such as GitHub Copilot agent mode or Codex, which read [`AGENTS.md`](../../AGENTS.md)
+  by themselves;
 - **§3** for a chat without access to the repository: claude.ai without Claude Code, or any other
   chat assistant.
 
@@ -36,7 +36,7 @@ Claude Code, Copilot agent mode, Codex:
 I am working on task <TASK> of The Anomaly Guard, theme <THEME>:
 "<TASK ROW>"
 
-1. Read CLAUDE.md and follow it. Then read the task's row and checklist in
+1. Read AGENTS.md and follow it. Then read the task's row and checklist in
    docs/planning/backlog.md, the ADRs and the docs/statistics/methods.md sections it cites,
    and the files listed for <TASK> in docs/guides/task-prompt.md §4.
 2. Before changing anything, give me a plan in at most 10 lines: the functions and formulas,
@@ -63,7 +63,7 @@ A chat cannot read the repository or run commands, so you give it the files and 
 commands.
 
 **Once, on claude.ai:** create a Project (for example "Anomaly Guard") and add these files of the
-repository as project knowledge, so you never attach them again: `CLAUDE.md`,
+repository as project knowledge, so you never attach them again: `AGENTS.md`,
 `docs/statistics/methods.md`, `docs/planning/backlog.md`, and ADR-006 to ADR-010 from
 `docs/development/adr/`. Download them from GitHub, or take them from your clone. Update them in
 the Project when they change on `main`. With another chat assistant, attach them to the
@@ -77,10 +77,10 @@ I am working on task <TASK> of The Anomaly Guard, theme <THEME>:
 "<TASK ROW>"
 
 You cannot read the repository or run commands: the project knowledge holds the rules
-(CLAUDE.md), the methods, the backlog and the ADRs; the attached files are the code and tests
-for this task. Follow CLAUDE.md.
+(AGENTS.md), the methods, the backlog and the ADRs; the attached files are the code and tests
+for this task. Follow AGENTS.md.
 
-1. Read CLAUDE.md, the task's row and checklist in the backlog, the ADRs and the methods.md
+1. Read AGENTS.md, the task's row and checklist in the backlog, the ADRs and the methods.md
    sections it cites, and the attached files. If you need a file I have not attached, ask me
    for it by its path instead of guessing its content.
 2. Before writing code, give me a plan in at most 10 lines: the functions and formulas, the

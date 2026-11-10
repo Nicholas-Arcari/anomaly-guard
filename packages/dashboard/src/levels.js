@@ -1,7 +1,7 @@
 // Alert levels 0–15 and severities, as in SIEM consoles, with a statistical meaning (ADR-010): a
 // statistical alert of level k has anomaly score s = −log10(p) ≥ k, i.e. p ≤ 10^−k (ADR-007);
 // level 15 is reserved for signature matches. Display only: the verdict always comes from the
-// threshold (CLAUDE.md §5), never from the level. Pure: no DOM, tested in Node.
+// threshold (AGENTS.md §5), never from the level. Pure: no DOM, tested in Node.
 
 /** Level of a signature (rule) match. */
 export const SIGNATURE_LEVEL = 15;

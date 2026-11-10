@@ -30,6 +30,7 @@
 | F-05 | Methodology foundations: ADR-006–009; attacks injected into legit requests, `variant`, `calibration` split; per-(path, param) model with one file per signal; −log10(p) scale; continuous detector score; purity lint; doc fixes; work split by theme (§8) | F-04       | Done   |
 | F-06 | Team setup, one command for everyone (`npm run team-setup`): e-mail private on GitHub, noreply commit identity, pre-commit check, invitation accepted                                                                                                      | F-01       | Done   |
 | F-07 | Repository moved to the organization `the-anomaly-guard`: neutral addresses, every member an owner; links, demo, team guide and team setup updated                                                                                                         | F-06       | Done   |
+| F-08 | `AGENTS.md` is the manual for people and every AI assistant; `CLAUDE.md` only loads it (`@AGENTS.md`) for Claude Code                                                                                                                                      | F-01       | Done   |
 
 ## 3. A — Traffic & dataset (`packages/traffic`)
 

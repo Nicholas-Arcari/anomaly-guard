@@ -2,7 +2,7 @@
 
 These documents hold the rules and decisions that govern how the project is built. They are
 **binding** for everyone who contributes, people and AI assistants alike. The short, binding
-summary is [`../../CLAUDE.md`](../../CLAUDE.md); these files are the detail behind it.
+summary is [`../../AGENTS.md`](../../AGENTS.md); these files are the detail behind it.
 
 ## Index
 

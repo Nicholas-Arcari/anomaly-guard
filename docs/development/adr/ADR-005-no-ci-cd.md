@@ -46,5 +46,5 @@ deliverable is an experiment plus a report, not a continuously deployed service.
 ### Actions
 
 - [x] No workflow files in the repository.
-- [x] Document the local checks in `CLAUDE.md` §9 and `standards.md` §7.
+- [x] Document the local checks in `AGENTS.md` §9 and `standards.md` §7.
 - [ ] If the team later wants a minimal `npm test` workflow, supersede this ADR.

@@ -4,8 +4,8 @@
 
 ```
 anomaly-guard/
-├── CLAUDE.md                 # Contributor & agent manual (binding summary)
-├── AGENTS.md                 # Pointer to CLAUDE.md
+├── AGENTS.md                 # Contributor & agent manual (binding summary)
+├── CLAUDE.md                 # Loads AGENTS.md for Claude Code (@AGENTS.md)
 ├── README.md / README.it.md  # Overview (EN default / IT)
 ├── package.json              # npm workspaces root, shared scripts
 ├── eslint.config.js          # ESLint 9 flat config

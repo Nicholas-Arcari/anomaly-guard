@@ -15,7 +15,7 @@ and at what cost in false positives and false negatives?
 
 This is an **experiment**, not a production IDS. All traffic is synthetic and local — nothing is
 captured from a real network, and no payload is ever executed or sent anywhere. See the scope
-boundaries in [`CLAUDE.md`](CLAUDE.md) §2.
+boundaries in [`AGENTS.md`](AGENTS.md) §2.
 
 ## What's inside
 
@@ -42,7 +42,7 @@ Requires **Node.js ≥ 22**.
 
 ## Documentation
 
-- [`CLAUDE.md`](CLAUDE.md) — contributor & agent manual (start here)
+- [`AGENTS.md`](AGENTS.md) — contributor & agent manual (start here)
 - [`docs/project-brief.md`](docs/project-brief.md) — the assignment (defines scope)
 - [`docs/development/`](docs/development/README.md) — standards, structure, tech stack, ADRs
 - [`docs/statistics/methods.md`](docs/statistics/methods.md) — the maths (entropy, chi-square,
