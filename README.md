@@ -11,7 +11,7 @@ from it), and then measures — honestly — how often each approach is right an
 **Research question:** how much can statistics catch _without_ pre-defined attack signatures,
 and at what cost in false positives and false negatives?
 
-**Live demo:** <https://nicholas-arcari.github.io/anomaly-guard/> — runs entirely in your browser.
+**Live demo:** <https://the-anomaly-guard.github.io/anomaly-guard/> — runs entirely in your browser.
 
 This is an **experiment**, not a production IDS. All traffic is synthetic and local — nothing is
 captured from a real network, and no payload is ever executed or sent anywhere. See the scope

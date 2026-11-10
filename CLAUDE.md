@@ -188,7 +188,7 @@ grade.
 ## 10. Quick reference
 
 ```
-Live demo:            https://nicholas-arcari.github.io/anomaly-guard/
+Live demo:            https://the-anomaly-guard.github.io/anomaly-guard/
 Team guide:           docs/guides/team-guide.md
 Assignment (scope):   docs/project-brief.md
 Dev rules:            docs/development/standards.md

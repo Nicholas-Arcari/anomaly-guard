@@ -7,7 +7,8 @@
 //   1. your GitHub account keeps your e-mail private ("Keep my email addresses private");
 //   2. git signs your commits with your GitHub noreply address, not your personal e-mail;
 //   3. this clone refuses a commit that would expose another address (.githooks/pre-commit);
-//   4. a pending invitation to this repository is accepted, so you can push branches.
+//   4. a pending invitation to the repository, or to the organization that owns it, is accepted,
+//      so you can push branches.
 // It works through the GitHub CLI (gh) with YOUR login, so it changes only your own account and
 // your own git settings. It prints every change, asks before touching your global git settings,
 // and skips what is already done, so it is safe to run again. Team guide: docs/guides/team-guide.md.
@@ -170,6 +171,24 @@ async function main() {
         run('gh', ['api', '--method', 'PATCH', `user/repository_invitations/${invite.id}`]),
       );
     } else ok(`no pending invitation to ${repo}`);
+
+    // The repository belongs to an organization: members are invited to the organization.
+    const org = repo.split('/')[0];
+    const membership = run('gh', ['api', `user/memberships/orgs/${org}`], { optional: true });
+    const state = membership === null ? null : JSON.parse(membership).state;
+    if (state === 'active') ok(`you are a member of the organization ${org}`);
+    else if (state === 'pending') {
+      change(`accept your invitation to the organization ${org}`, () => {
+        const accepted = run(
+          'gh',
+          ['api', '--method', 'PATCH', `user/memberships/orgs/${org}`, '-f', 'state=active'],
+          { optional: true },
+        );
+        if (accepted === null) {
+          console.log(`    Accept it in the browser: https://github.com/orgs/${org}/invitation`);
+        }
+      });
+    }
   }
   finish(noreply);
 }

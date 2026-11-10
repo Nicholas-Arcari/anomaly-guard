@@ -11,7 +11,7 @@ se ne discosta), e poi misura — onestamente — quanto ciascun approccio azzec
 **Domanda di ricerca:** quanto riesce a scoprire la statistica _senza_ firme di attacco
 predefinite, e a quale prezzo in falsi positivi e falsi negativi?
 
-**Demo online:** <https://nicholas-arcari.github.io/anomaly-guard/> — gira tutta nel browser.
+**Demo online:** <https://the-anomaly-guard.github.io/anomaly-guard/> — gira tutta nel browser.
 
 È un **esperimento**, non un IDS di produzione. Tutto il traffico è sintetico e locale: niente
 viene catturato da una rete reale e nessun payload viene mai eseguito o inviato da nessuna parte.

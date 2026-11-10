@@ -4,7 +4,7 @@ The project's console: a **multi-page**, SIEM-style web app (ADR-010) that runs 
 in the browser — generate the seeded traffic, learn normal behaviour from legitimate requests only,
 detect, evaluate — with no backend, so it is hosted on **GitHub Pages** (ADR-003).
 
-**Live:** <https://nicholas-arcari.github.io/anomaly-guard/>. Showing it in a portfolio:
+**Live:** <https://the-anomaly-guard.github.io/anomaly-guard/>. Showing it in a portfolio:
 [`docs/guides/team-guide.md`](../../docs/guides/team-guide.md).
 
 ## Pages
@@ -102,6 +102,6 @@ cd ../../..
 ```
 
 GitHub Pages is already set to **Deploy from a branch → `gh-pages` / `(root)`**; the new version is
-online within a few minutes at <https://nicholas-arcari.github.io/anomaly-guard/>. `gh-pages` keeps
+online within a few minutes at <https://the-anomaly-guard.github.io/anomaly-guard/>. `gh-pages` keeps
 no history: each publish replaces it. (An automated GitHub Actions deploy is intentionally
 omitted; add it with a follow-up ADR if the team wants it.)

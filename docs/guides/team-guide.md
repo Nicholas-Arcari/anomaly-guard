@@ -7,27 +7,31 @@ Step-by-step instructions for the members of the group, with the commands to run
   profile page), without copying any code into it.
 - **Part 3** is how visitors use the demo from inside your portfolio.
 
-Repository: <https://github.com/Nicholas-Arcari/anomaly-guard> · Live demo:
-<https://nicholas-arcari.github.io/anomaly-guard/>
+Repository: <https://github.com/the-anomaly-guard/anomaly-guard> · Live demo:
+<https://the-anomaly-guard.github.io/anomaly-guard/>
 
 ## Part 1 — Access the repository and work on it
 
-### 1.1 The owner invites you (repository owner only)
+### 1.1 An owner invites you (owners only)
 
-On GitHub: **Settings → Collaborators → Add people**, your teammate's username, role **Write**. Or
-from a terminal, once per teammate:
+The repository belongs to the organization
+[`the-anomaly-guard`](https://github.com/the-anomaly-guard), and every member of the group is one
+of its owners. To invite someone: **the organization → People → Invite member**, their username,
+role **Owner**. Or from a terminal, once per person:
 
 ```bash
-gh api -X PUT repos/Nicholas-Arcari/anomaly-guard/collaborators/<their-github-username> -f permission=push
+gh auth refresh -h github.com -s admin:org     # once: lets gh manage the organization
+gh api -X PUT orgs/the-anomaly-guard/memberships/<their-github-username> -f role=admin
 ```
 
-_Write_ lets them push branches and open pull requests; it does not let them change the
-repository's settings.
+An owner can push branches, merge pull requests, republish the demo and change every setting —
+deleting the repository included, so handle the settings with care.
 
 ### 1.2 Accept the invitation
 
-Open <https://github.com/Nicholas-Arcari/anomaly-guard/invitations> (or the e-mail from GitHub) and
-accept. Until then you can read the public repository but not push to it.
+Open <https://github.com/orgs/the-anomaly-guard/invitation> (or the e-mail from GitHub) and accept;
+`npm run team-setup` (§1.4) also accepts it for you, or tells you to open that link. Until then
+you can read the public repository but not push to it.
 
 ### 1.3 Install the tools (once)
 
@@ -48,7 +52,7 @@ gh --version      # any recent version
 ### 1.4 Get the code and run the setup (once per computer)
 
 ```bash
-git clone https://github.com/Nicholas-Arcari/anomaly-guard.git
+git clone https://github.com/the-anomaly-guard/anomaly-guard.git
 cd anomaly-guard
 npm install          # installs every workspace
 npm run team-setup   # your e-mail stays private (see below)
@@ -109,15 +113,15 @@ copied, and every portfolio shows the latest version as soon as the repository r
 
 Any page, with any settings, is a plain address:
 
-| Address                                                           | Shows              |
-| ----------------------------------------------------------------- | ------------------ |
-| `https://nicholas-arcari.github.io/anomaly-guard/`                | Overview           |
-| `https://nicholas-arcari.github.io/anomaly-guard/events.html`     | Security events    |
-| `https://nicholas-arcari.github.io/anomaly-guard/rules.html`      | Rules              |
-| `https://nicholas-arcari.github.io/anomaly-guard/models.html`     | Statistical models |
-| `https://nicholas-arcari.github.io/anomaly-guard/evaluation.html` | Detection quality  |
-| `https://nicholas-arcari.github.io/anomaly-guard/base-rate.html`  | Base rate          |
-| `https://nicholas-arcari.github.io/anomaly-guard/about.html`      | About the project  |
+| Address                                                             | Shows              |
+| ------------------------------------------------------------------- | ------------------ |
+| `https://the-anomaly-guard.github.io/anomaly-guard/`                | Overview           |
+| `https://the-anomaly-guard.github.io/anomaly-guard/events.html`     | Security events    |
+| `https://the-anomaly-guard.github.io/anomaly-guard/rules.html`      | Rules              |
+| `https://the-anomaly-guard.github.io/anomaly-guard/models.html`     | Statistical models |
+| `https://the-anomaly-guard.github.io/anomaly-guard/evaluation.html` | Detection quality  |
+| `https://the-anomaly-guard.github.io/anomaly-guard/base-rate.html`  | Base rate          |
+| `https://the-anomaly-guard.github.io/anomaly-guard/about.html`      | About the project  |
 
 Add settings to open a specific experiment, for example
 `…/events.html?seed=7&mode=stats&threshold=2&prevalence=0.1&size=1000&show=mistakes`.
@@ -125,7 +129,10 @@ Add settings to open a specific experiment, for example
 ### 2.2 Option A — a link (works everywhere)
 
 ```html
-<a href="https://nicholas-arcari.github.io/anomaly-guard/" target="_blank" rel="noopener noreferrer"
+<a
+  href="https://the-anomaly-guard.github.io/anomaly-guard/"
+  target="_blank"
+  rel="noopener noreferrer"
   >The Anomaly Guard — live demo</a
 >
 ```
@@ -137,7 +144,7 @@ Plain HTML (also Jekyll, Hugo and similar):
 ```html
 <iframe
   class="anomaly-guard-demo"
-  src="https://nicholas-arcari.github.io/anomaly-guard/"
+  src="https://the-anomaly-guard.github.io/anomaly-guard/"
   title="The Anomaly Guard — live demo"
   loading="lazy"
   referrerpolicy="no-referrer"
@@ -150,7 +157,7 @@ React (JSX):
 ```jsx
 <iframe
   className="anomaly-guard-demo"
-  src="https://nicholas-arcari.github.io/anomaly-guard/"
+  src="https://the-anomaly-guard.github.io/anomaly-guard/"
   title="The Anomaly Guard — live demo"
   loading="lazy"
   referrerPolicy="no-referrer"
@@ -195,7 +202,7 @@ directive to the existing policy, or replace an existing `frame-src` (for exampl
 `frame-src 'none'`) with it, and leave the rest unchanged:
 
 ```text
-frame-src https://nicholas-arcari.github.io/anomaly-guard/
+frame-src https://the-anomaly-guard.github.io/anomaly-guard/
 ```
 
 ### 2.5 Publish your portfolio
@@ -242,13 +249,13 @@ Everything runs in the visitor's browser: no request leaves it and no payload is
 
 ## Troubleshooting
 
-| What you see                                                                | Cause                                    | Fix                                                    |
-| --------------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------ |
-| Blank frame; the browser console says "Refused to frame … `frame-src` …"    | your site's Content Security Policy      | step 2.4                                               |
-| Blank frame; the console mentions `X-Frame-Options` or "refused to connect" | the address points to github.com         | use `https://nicholas-arcari.github.io/anomaly-guard/` |
-| "404" inside the frame                                                      | a typo in the page name                  | open the address in a new tab and correct it           |
-| An old version                                                              | browser or GitHub Pages cache (≤ 10 min) | wait, then reload without the cache                    |
-| "Source code" does nothing                                                  | the sandbox does not allow new tabs      | add `allow-popups allow-popups-to-escape-sandbox`      |
+| What you see                                                                | Cause                                    | Fix                                                      |
+| --------------------------------------------------------------------------- | ---------------------------------------- | -------------------------------------------------------- |
+| Blank frame; the browser console says "Refused to frame … `frame-src` …"    | your site's Content Security Policy      | step 2.4                                                 |
+| Blank frame; the console mentions `X-Frame-Options` or "refused to connect" | the address points to github.com         | use `https://the-anomaly-guard.github.io/anomaly-guard/` |
+| "404" inside the frame                                                      | a typo in the page name                  | open the address in a new tab and correct it             |
+| An old version                                                              | browser or GitHub Pages cache (≤ 10 min) | wait, then reload without the cache                      |
+| "Source code" does nothing                                                  | the sandbox does not allow new tabs      | add `allow-popups allow-popups-to-escape-sandbox`        |
 
 ## For the repository owner: republishing the demo
 
