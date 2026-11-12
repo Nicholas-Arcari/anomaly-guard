@@ -32,6 +32,37 @@ length-bound ideas. Decisions behind this page: ADR-004, ADR-006 – ADR-009.
   1 = p ≤ 0.1, 2 = p ≤ 0.01, 3 = p ≤ 0.001. Higher is always more anomalous. The threshold is
   applied by the caller (`pToScore` in `stats/model.js`).
 
+### Synthetic legitimate traffic (A-02)
+
+This is an explicit **assumed**, not empirically fitted, model. It cannot establish realism for a
+particular website. Each request independently selects one endpoint by a categorical draw:
+`/search` 25%, `/products` 20%, `/cart` 15%, `/login` 15%, `/profile` 10%, and `/comments` 15%.
+The method and parameters below are fixed by that endpoint, as in ADR-006. All draws use the
+seeded generator, including in train, calibration and test.
+
+| Endpoint    | Method | Parameter distributions                                                                                                           |
+| ----------- | ------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| `/search`   | GET    | `q`: 1–4 words, uniformly selected count; `page`: geometric with p=0.35                                                           |
+| `/products` | GET    | `id`: uniform integer 1–9999; `sort`: uniform among `popular`, `price`, `new`                                                     |
+| `/cart`     | POST   | `id`: uniform integer 1–9999; `qty`: geometric with p=0.5                                                                         |
+| `/login`    | POST   | `user`: uniform synthetic name; `pass`: uniform length 8–24, independent uniform characters from the documented password alphabet |
+| `/profile`  | POST   | `email`: uniform synthetic local part at `example.com`; `bio`: generated text of log-normal length                                |
+| `/comments` | POST   | `name`: uniform synthetic name; `body`: generated text of log-normal length                                                       |
+
+The exact vocabulary, name and email pools, password alphabet and sentence templates are in
+`packages/traffic/src/generators.js`. Search and text words are independent draws from a finite ranked vocabulary, with
+`P(rank r) = (1/r) / Σ(1/j)`. Thus a few words recur often without removing rare words. Text
+length is `min(4096, max(1, round(exp(log(100) + 1.2 Z))))`, where `Z` is standard normal
+sampled using Box–Muller. The unrounded, unbounded distribution has median 100 and 90th
+percentile approximately 466; rounding and the 4096 cap alter its extreme tail. Construct text
+from sentence fragments, punctuation and occasional fixed contextual strings until the chosen
+length, then truncate to that length in JavaScript UTF-16 code units. Each sentence selects one
+of four fixed templates uniformly and inserts independently sampled words. Geometric draws use
+`P(X=k)=p(1-p)^(k-1)`, k ≥ 1; their means are 1/p. Text and fields are synthetic and may include
+accents and non-Latin characters; fixed URLs are data and are never requested. Values and weights
+are chosen for varied examples, not inferred from user data. Changes to the generator change the
+dataset even with the same seed, so record both seed and commit (ADR-009).
+
 ## 1. Shannon entropy — `stats/entropy.js` (implemented)
 
 For a string over symbols with probabilities `p_i` (relative frequencies),
