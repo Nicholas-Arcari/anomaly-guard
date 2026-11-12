@@ -63,18 +63,26 @@ accents and non-Latin characters; fixed URLs are data and are never requested. V
 are chosen for varied examples, not inferred from user data. Changes to the generator change the
 dataset even with the same seed, so record both seed and commit (ADR-009).
 
-### Synthetic attacks (A-03)
+### Synthetic attacks (A-03, A-04)
 
 An attack starts as a legitimate request; one uniformly chosen parameter value is replaced by a
-payload (ADR-006). The generator picks uniformly among the five nonempty families, then uniformly
+payload (ADR-006). The generator picks uniformly among the nine nonempty families, then uniformly
 among that family's entries. These are assumed sampling weights, not estimates of real attack
-frequency. Each family therefore has approximately probability `1/5`; each of the six SQL
-examples has probability approximately `(1/5) · (1/6) = 1/30`. XSS and traversal each have six
-canonical examples and one existing obfuscated example, so their conditional canonical share is
-`6/7`. SQL and command injection each have six canonical examples; oversized has one novel
-example. Thus the overall canonical share among attacks is approximately `26/35`. Equal family
-weights do not imply equal variant or payload weights. These proportions describe the generator,
-not detector accuracy or the prevalence of attacks in real traffic.
+frequency. Each family has probability `1/9`; each of the twelve SQL examples has probability
+`(1/9) · (1/12) = 1/108`. The canonical shares within SQL, XSS, traversal and command injection
+are respectively `8/12`, `6/9`, `6/7` and `6/6`. The other five families are entirely novel,
+so among attacks the expected variant shares are canonical `67/189`, obfuscated `17/189` and
+novel `5/9`. Equal family weights do not imply equal variant or payload weights. These proportions
+describe the generator, not detector accuracy or the prevalence of attacks in real traffic.
+
+Obfuscated examples cover leftover percent escapes after the server's one decoding pass, embedded
+comments, mixed case, tabs and newlines, string concatenation and HTML entities. These are labelled
+by construction, even if a rule happens to catch one; syntax acceptance can vary by parser. Short
+mimicry examples such as `1 OR 1=1` and `admin'--` are labelled `canonical` because they are
+untransformed targeted-family examples. `mimicry` is not a separate ADR-006 variant. The novel
+families are fixed in advance: oversized, template, LDAP, NoSQL and CRLF/header injection. They are
+not defined by which samples the rules miss. These small, hand-picked pools test the experiment's
+design; they do not represent the variety or frequency of attacks in the real world.
 
 The canonical strings are public examples or small adaptations of examples from OWASP's
 [SQL injection testing guide](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/07-Input_Validation_Testing/05-Testing_for_SQL_Injection/),
@@ -82,6 +90,13 @@ The canonical strings are public examples or small adaptations of examples from 
 [XSS examples](https://cheatsheetseries.owasp.org/cheatsheets/XSS_Filter_Evasion_Cheat_Sheet.html),
 [path traversal overview](https://community.owasp.org/attacks/Path_Traversal), and
 [command injection overview](https://community.owasp.org/attacks/Command_Injection).
+The additional examples and transformations follow or adapt public descriptions in OWASP's
+[SQL filter bypass examples](https://community.owasp.org/attacks/SQL_Injection_Bypassing_WAF),
+[XSS filter evasion examples](https://cheatsheetseries.owasp.org/cheatsheets/XSS_Filter_Evasion_Cheat_Sheet.html),
+[template injection guide](https://wstg.owasp.org/latest/4-Web_Application_Security_Testing/07-Injection/18-Server-side_Template_Injection/),
+[LDAP injection guide](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Injection_Testing/06-Testing_for_LDAP_Injection/),
+[NoSQL security guide](https://cheatsheetseries.owasp.org/cheatsheets/NoSQL_Security_Cheat_Sheet.html), and
+[HTTP response splitting guide](https://wstg.owasp.org/latest/4-Web_Application_Security_Testing/07-Injection/15-HTTP_Response_Splitting/).
 They are synthetic measurement subjects, not real requests; no claim is made that this small,
 hand-picked pool represents real-world attack frequencies or all possible attacks. A change to
 the pool can change generated results for the same seed, so record the commit as well as the seed.

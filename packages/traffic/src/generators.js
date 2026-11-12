@@ -179,6 +179,13 @@ export const ATTACK_PAYLOADS = {
     { variant: 'canonical', payload: 'UNION SELECT NULL,NULL' },
     { variant: 'canonical', payload: '10 OR 1=1' },
     { variant: 'canonical', payload: '10 UNION SELECT 1,null,null--' },
+    // Short mimicry examples retain the canonical label: it describes their construction.
+    { variant: 'canonical', payload: '1 OR 1=1' },
+    { variant: 'canonical', payload: "admin'--" },
+    { variant: 'obfuscated', payload: 'UN/**/ION SELECT NULL,NULL' },
+    { variant: 'obfuscated', payload: 'uNiOn SeLeCt NULL,NULL' },
+    { variant: 'obfuscated', payload: 'UNION\tSELECT NULL,NULL' },
+    { variant: 'obfuscated', payload: 'UNION\nSELECT NULL,NULL' },
   ],
   xss: [
     { variant: 'canonical', payload: '<script>alert(1)</script>' },
@@ -188,6 +195,8 @@ export const ATTACK_PAYLOADS = {
     { variant: 'canonical', payload: '<script>alert("TEST");</script>' },
     { variant: 'canonical', payload: '<svg/onload=alert(1)>' },
     { variant: 'obfuscated', payload: '%3Cscript%3Ealert(1)%3C/script%3E' }, // double-encoded
+    { variant: 'obfuscated', payload: "<script>window['al'+'ert'](1)</script>" },
+    { variant: 'obfuscated', payload: '<img src=x onerror="&#97;&#108;&#101;&#114;&#116;(1)">' },
   ],
   traversal: [
     { variant: 'canonical', payload: '../../etc/passwd' },
@@ -209,6 +218,11 @@ export const ATTACK_PAYLOADS = {
   // No rule targets this family on purpose: a long repetitive filler (buffer-overflow / fuzzing
   // style) that only the statistics can see.
   oversized: [{ variant: 'novel', payload: 'A'.repeat(1024) }],
+  // The novel family list is fixed before evaluation, not selected by rule-engine results.
+  template: [{ variant: 'novel', payload: '{{7*7}}' }],
+  ldap: [{ variant: 'novel', payload: '*)(uid=*))(|(uid=*' }],
+  nosql: [{ variant: 'novel', payload: '{"$ne":null}' }],
+  crlf: [{ variant: 'novel', payload: '\r\nX-Injected: test' }],
 };
 
 /**
