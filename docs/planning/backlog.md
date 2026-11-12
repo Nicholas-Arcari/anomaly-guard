@@ -39,7 +39,7 @@
 | A-01 | Seeded RNG (reproducible) + tests                                                                                                        | T4    | F-01       | Done            |
 | A-02 | **Realistic legitimate traffic**, written as an explicit probability model — checklist below. The validity of every result depends on it | T4    | F-05       | Done            |
 | A-03 | Canonical attacks: more public example payloads per targeted family (sqli, xss, traversal, cmdi)                                         | T4    | F-05       | Done            |
-| A-04 | Obfuscated and novel attacks (ADR-006 definitions) — checklist below                                                                     | T4    | A-03       | Ready           |
+| A-04 | Obfuscated and novel attacks (ADR-006 definitions) — checklist below                                                                     | T4    | A-03       | Blocked         |
 | A-05 | Hard cases: a committed fixture file + `variant: 'hard'` legit samples mixed into the **test** set (e.g. a `hardShare` option)           | T4    | A-02       | Ready           |
 | A-06 | `buildDataset` → `train` / `calibration` / `test`, every sample `{ request, label, kind, variant }`                                      | T4    | F-05       | Done (baseline) |
 
@@ -73,6 +73,9 @@
   injection, plus the existing `oversized`.
 - _Mimicry_: short attacks that look normal (`1 OR 1=1`, `admin'--`), labelled by how they were made.
 - Public, well-known example strings only, never executed (ADR-001).
+
+The A-04 implementation is awaiting a passing full test run: the existing dashboard `pOf(4)`
+test fails on Node 22.22.1 because of floating-point rounding, independently of the traffic changes.
 
 ## 4. B — Server & rules (`packages/server`, `core/rules`)
 
