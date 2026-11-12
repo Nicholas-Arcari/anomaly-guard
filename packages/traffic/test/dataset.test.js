@@ -50,6 +50,20 @@ test('buildDataset: test split honours the requested prevalence (base rate)', ()
   assert.equal(attacks, 100); // round(1000 · 0.1)
 });
 
+test('buildDataset: prevalence boundaries keep training and calibration legitimate', () => {
+  for (const prevalence of [0, 1]) {
+    const options = { seed: 42, trainSize: 10, calibrationSize: 10, testSize: 30, prevalence };
+    const dataset = buildDataset(options);
+    assert.deepEqual(dataset, buildDataset(options));
+    assert.ok(dataset.train.every((sample) => sample.label === 'legit'));
+    assert.ok(dataset.calibration.every((sample) => sample.label === 'legit'));
+    assert.equal(
+      dataset.test.filter((sample) => sample.label === 'attack').length,
+      30 * prevalence,
+    );
+  }
+});
+
 test('buildDataset: is reproducible for a fixed seed', () => {
   const d1 = buildDataset({ seed: 999, trainSize: 100, testSize: 100 });
   const d2 = buildDataset({ seed: 999, trainSize: 100, testSize: 100 });

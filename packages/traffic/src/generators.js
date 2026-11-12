@@ -1,6 +1,6 @@
 // Generators for simulated requests. Legitimate traffic is built from innocuous word pools;
 // malicious traffic uses a few canonical, public example strings as MEASUREMENT SUBJECTS only —
-// they are never executed, parsed, or sent anywhere (ADR-001). A-03/A-04 extend the attack pool.
+// they are never executed, parsed, or sent anywhere (ADR-001).
 // Pure, runtime-agnostic (takes an Rng so it stays reproducible).
 //
 // Dataset contract (ADR-006):
@@ -168,7 +168,7 @@ export function makeLegitRequest(rng) {
  * Public example payloads per attack family, used only as detector input (ADR-001). `variant`
  * follows ADR-006: 'canonical' = textbook form of a family the rule set targets; 'obfuscated' =
  * a targeted family transformed to dodge signatures; 'novel' = a family the rule set has no
- * signature for, by design. Keep these as plain data; A-03/A-04 extend the table.
+ * signature for, by design. Keep these as plain data; public sources are listed in methods.md §0.
  * @type {Record<string, { payload: string, variant: AttackVariant }[]>}
  */
 export const ATTACK_PAYLOADS = {
@@ -177,21 +177,34 @@ export const ATTACK_PAYLOADS = {
     { variant: 'canonical', payload: "1' OR '1'='1' --" },
     { variant: 'canonical', payload: "'; DROP TABLE users --" },
     { variant: 'canonical', payload: 'UNION SELECT NULL,NULL' },
+    { variant: 'canonical', payload: '10 OR 1=1' },
+    { variant: 'canonical', payload: '10 UNION SELECT 1,null,null--' },
   ],
   xss: [
     { variant: 'canonical', payload: '<script>alert(1)</script>' },
     { variant: 'canonical', payload: '"><img src=x onerror=alert(1)>' },
+    { variant: 'canonical', payload: "<body onload=alert('test1')>" },
+    { variant: 'canonical', payload: "<b onmouseover=alert('Wufff!')>click me!</b>" },
+    { variant: 'canonical', payload: '<script>alert("TEST");</script>' },
+    { variant: 'canonical', payload: '<svg/onload=alert(1)>' },
     { variant: 'obfuscated', payload: '%3Cscript%3Ealert(1)%3C/script%3E' }, // double-encoded
   ],
   traversal: [
     { variant: 'canonical', payload: '../../etc/passwd' },
     { variant: 'canonical', payload: '..\\..\\windows\\win.ini' },
+    { variant: 'canonical', payload: '../../../../etc/shadow' },
+    { variant: 'canonical', payload: '../../../../some dir/some file' },
+    { variant: 'canonical', payload: '../../../../../../../../../etc/passwd' },
+    { variant: 'canonical', payload: '..\\..\\..\\windows\\win.ini' },
     { variant: 'obfuscated', payload: '%2e%2e%2f%2e%2e%2fetc/passwd' }, // double-encoded
   ],
   cmdi: [
     { variant: 'canonical', payload: '; cat /etc/passwd' },
     { variant: 'canonical', payload: '| whoami' },
     { variant: 'canonical', payload: '`id`' },
+    { variant: 'canonical', payload: '&& whoami' },
+    { variant: 'canonical', payload: '|| whoami' },
+    { variant: 'canonical', payload: '& whoami' },
   ],
   // No rule targets this family on purpose: a long repetitive filler (buffer-overflow / fuzzing
   // style) that only the statistics can see.
