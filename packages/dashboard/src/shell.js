@@ -80,5 +80,7 @@ export function describe(state) {
  */
 export function pOf(threshold) {
   const p = 10 ** -threshold;
-  return p >= 1e-4 ? String(Number(p.toPrecision(2))) : p.toExponential(0).replace('e-', '·10^−');
+  return threshold <= 4
+    ? String(Number(p.toPrecision(2)))
+    : p.toExponential(0).replace('e-', '·10^−');
 }

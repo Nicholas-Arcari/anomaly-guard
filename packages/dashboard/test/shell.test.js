@@ -8,7 +8,9 @@ test('pOf: the tail probability of a threshold, p = 10^−threshold, written pla
   assert.equal(pOf(1), '0.1');
   assert.equal(pOf(2), '0.01');
   assert.equal(pOf(1.5), '0.032');
+  assert.equal(pOf(3.999), '0.0001');
   assert.equal(pOf(4), '0.0001');
+  assert.equal(pOf(4.001), '1·10^−4');
   assert.equal(pOf(6), '1·10^−6');
 });
 
