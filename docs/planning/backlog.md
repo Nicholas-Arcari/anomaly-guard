@@ -40,7 +40,7 @@
 | A-02 | **Realistic legitimate traffic**, written as an explicit probability model — checklist below. The validity of every result depends on it | T4    | F-05       | Done            |
 | A-03 | Canonical attacks: more public example payloads per targeted family (sqli, xss, traversal, cmdi)                                         | T4    | F-05       | Done            |
 | A-04 | Obfuscated and novel attacks (ADR-006 definitions) — checklist below                                                                     | T4    | A-03       | Done            |
-| A-05 | Hard cases: a committed fixture file + `variant: 'hard'` legit samples mixed into the **test** set (e.g. a `hardShare` option)           | T4    | A-02       | Ready           |
+| A-05 | Hard cases: a committed fixture file + `variant: 'hard'` legit samples mixed into the **test** set (e.g. a `hardShare` option)           | T4    | A-02       | Done            |
 | A-06 | `buildDataset` → `train` / `calibration` / `test`, every sample `{ request, label, kind, variant }`                                      | T4    | F-05       | Done (baseline) |
 
 **A-02 checklist — what "realistic" means here:**

@@ -8,6 +8,7 @@
 
 import { createRng } from './rng.js';
 import { makeLegitRequest, makeAttackRequest } from './generators.js';
+import { HARD_CASES } from './hard-cases.js';
 
 /**
  * @typedef {Object} Sample
@@ -25,6 +26,7 @@ import { makeLegitRequest, makeAttackRequest } from './generators.js';
  *   (use ≥ 1000 when the target FPR is 1% or lower, or the quantile is too noisy)
  * @param {number} [opts.testSize=500]          samples in the test set
  * @param {number} [opts.prevalence=0.1]        attack base rate of the TEST set (0..1)
+ * @param {number} [opts.hardShare=0]           fraction of legitimate TEST samples from fixtures (0..1)
  * @returns {{ seed: number, train: Sample[], calibration: Sample[], test: Sample[] }}
  *   `train` and `calibration` are legit-only; `test` has round(testSize·prevalence) attacks.
  */
@@ -34,7 +36,11 @@ export function buildDataset({
   calibrationSize = 500,
   testSize = 500,
   prevalence = 0.1,
+  hardShare = 0,
 } = {}) {
+  if (!Number.isFinite(hardShare) || hardShare < 0 || hardShare > 1) {
+    throw new RangeError('hardShare must be a finite number between 0 and 1');
+  }
   const rng = createRng(seed);
 
   /** @type {Sample[]} */
@@ -44,11 +50,16 @@ export function buildDataset({
 
   const attackCount = Math.round(testSize * prevalence);
   const legitCount = testSize - attackCount;
+  const hardCount = Math.round(legitCount * hardShare);
   /** @type {Sample[]} */
-  const testLegit = Array.from({ length: legitCount }, () => makeLegitRequest(rng));
+  const testLegit = Array.from({ length: legitCount - hardCount }, () => makeLegitRequest(rng));
+  const testHard = Array.from({ length: hardCount }, () => {
+    const sample = rng.pick(HARD_CASES);
+    return { ...sample, request: { ...sample.request, params: { ...sample.request.params } } };
+  });
   /** @type {Sample[]} */
   const testAttacks = Array.from({ length: attackCount }, () => makeAttackRequest(rng));
-  const test = shuffle([...testLegit, ...testAttacks], rng);
+  const test = shuffle([...testLegit, ...testHard, ...testAttacks], rng);
 
   return { seed, train, calibration, test };
 }

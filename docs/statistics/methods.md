@@ -63,6 +63,28 @@ accents and non-Latin characters; fixed URLs are data and are never requested. V
 are chosen for varied examples, not inferred from user data. Changes to the generator change the
 dataset even with the same seed, so record both seed and commit (ADR-009).
 
+### Held-out legitimate hard cases (A-05)
+
+`buildDataset` can add a fixed, synthetic fixture pool of unusual but legitimate requests to the
+test split: apostrophes, non-Latin text, long free text and punctuation. Their `hard` variant
+describes how they were selected, not a detector's verdict. They keep the same endpoint schemas as
+the ordinary generator. The generator itself can still produce unusual inputs in any split; the
+fixture pool is added only to test, never to training or calibration.
+
+The optional `hardShare` (default 0, range 0–1) is the assumed share among **legitimate test**
+requests. First take `attacks = round(testSize × prevalence)`, then
+`hard = round((testSize − attacks) × hardShare)`; the remaining legitimate requests are generated
+normally. For example, 100 tests at prevalence 0.1 and hardShare 0.1 contain 10 attacks, 9 hard
+and 81 typical legitimate requests. The seeded generator samples each of the four fixtures with
+equal probability 1/4, independently with replacement, and shuffles the test set. The actual
+share can differ slightly due to rounding. Record `hardShare` along with the seed and commit.
+
+This deliberately chosen share and the small hand-picked fixture pool are not estimates of real
+traffic; repeated examples are not independent new cases. Report false positives separately for
+hard and typical legitimate inputs and interpret the overall FPR in light of the chosen mixture.
+The calibration threshold remains chosen on its separate legitimate-only split, without using test
+results.
+
 ### Synthetic attacks (A-03, A-04)
 
 An attack starts as a legitimate request; one uniformly chosen parameter value is replaced by a
