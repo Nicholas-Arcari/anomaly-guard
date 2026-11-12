@@ -36,6 +36,11 @@ so it has the same method, path and parameter names as normal traffic (ADR-006).
 how the sample was made: legit `typical` | `hard`; attack `canonical` | `obfuscated` | `novel`.
 It drives evaluation only, never training.
 
+The seed is required and must be an unsigned 32-bit integer. Split sizes must be non-negative
+safe integers; `prevalence` and `hardShare` must be finite numbers from 0 to 1. The test set has
+`round(testSize × prevalence)` attacks and `round(legitimate test count × hardShare)` hard cases.
+Generated splits contain separate samples, though their values can coincide by chance.
+
 Record the `seed` and the git commit with every reported result — together they reproduce the
 whole dataset.
 
