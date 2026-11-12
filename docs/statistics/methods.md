@@ -63,6 +63,29 @@ accents and non-Latin characters; fixed URLs are data and are never requested. V
 are chosen for varied examples, not inferred from user data. Changes to the generator change the
 dataset even with the same seed, so record both seed and commit (ADR-009).
 
+### Synthetic attacks (A-03)
+
+An attack starts as a legitimate request; one uniformly chosen parameter value is replaced by a
+payload (ADR-006). The generator picks uniformly among the five nonempty families, then uniformly
+among that family's entries. These are assumed sampling weights, not estimates of real attack
+frequency. Each family therefore has approximately probability `1/5`; each of the six SQL
+examples has probability approximately `(1/5) · (1/6) = 1/30`. XSS and traversal each have six
+canonical examples and one existing obfuscated example, so their conditional canonical share is
+`6/7`. SQL and command injection each have six canonical examples; oversized has one novel
+example. Thus the overall canonical share among attacks is approximately `26/35`. Equal family
+weights do not imply equal variant or payload weights. These proportions describe the generator,
+not detector accuracy or the prevalence of attacks in real traffic.
+
+The canonical strings are public examples or small adaptations of examples from OWASP's
+[SQL injection testing guide](https://wstg.owasp.org/v4.2/4-Web_Application_Security_Testing/07-Input_Validation_Testing/05-Testing_for_SQL_Injection/),
+[XSS overview](https://community.owasp.org/attacks/xss/),
+[XSS examples](https://cheatsheetseries.owasp.org/cheatsheets/XSS_Filter_Evasion_Cheat_Sheet.html),
+[path traversal overview](https://community.owasp.org/attacks/Path_Traversal), and
+[command injection overview](https://community.owasp.org/attacks/Command_Injection).
+They are synthetic measurement subjects, not real requests; no claim is made that this small,
+hand-picked pool represents real-world attack frequencies or all possible attacks. A change to
+the pool can change generated results for the same seed, so record the commit as well as the seed.
+
 ## 1. Shannon entropy — `stats/entropy.js` (implemented)
 
 For a string over symbols with probabilities `p_i` (relative frequencies),
