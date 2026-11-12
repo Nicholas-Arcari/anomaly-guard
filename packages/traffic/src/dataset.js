@@ -20,7 +20,7 @@ import { HARD_CASES } from './hard-cases.js';
 
 /**
  * @param {Object} opts
- * @param {number} opts.seed                    RNG seed (recorded with results)
+ * @param {number} opts.seed                    unsigned 32-bit integer RNG seed (recorded with results)
  * @param {number} [opts.trainSize=500]         legitimate samples for fitting the model
  * @param {number} [opts.calibrationSize=500]   legitimate samples for choosing the threshold
  *   (use ≥ 1000 when the target FPR is 1% or lower, or the quantile is too noisy)
@@ -29,6 +29,7 @@ import { HARD_CASES } from './hard-cases.js';
  * @param {number} [opts.hardShare=0]           fraction of legitimate TEST samples from fixtures (0..1)
  * @returns {{ seed: number, train: Sample[], calibration: Sample[], test: Sample[] }}
  *   `train` and `calibration` are legit-only; `test` has round(testSize·prevalence) attacks.
+ *   Sizes must be non-negative safe integers; seed and shares are validated before generation.
  */
 export function buildDataset({
   seed,
@@ -38,6 +39,17 @@ export function buildDataset({
   prevalence = 0.1,
   hardShare = 0,
 } = {}) {
+  if (!Number.isInteger(seed) || seed < 0 || seed > 0xffffffff) {
+    throw new RangeError('seed must be an unsigned 32-bit integer');
+  }
+  for (const [name, size] of Object.entries({ trainSize, calibrationSize, testSize })) {
+    if (!Number.isSafeInteger(size) || size < 0) {
+      throw new RangeError(`${name} must be a non-negative safe integer`);
+    }
+  }
+  if (!Number.isFinite(prevalence) || prevalence < 0 || prevalence > 1) {
+    throw new RangeError('prevalence must be a finite number between 0 and 1');
+  }
   if (!Number.isFinite(hardShare) || hardShare < 0 || hardShare > 1) {
     throw new RangeError('hardShare must be a finite number between 0 and 1');
   }

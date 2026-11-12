@@ -68,8 +68,90 @@ test('buildDataset: prevalence boundaries keep training and calibration legitima
 test('buildDataset: is reproducible for a fixed seed', () => {
   const d1 = buildDataset({ seed: 999, trainSize: 100, testSize: 100 });
   const d2 = buildDataset({ seed: 999, trainSize: 100, testSize: 100 });
-  assert.deepEqual(d1.test[0], d2.test[0]);
-  assert.deepEqual(d1.train.at(-1), d2.train.at(-1));
+  assert.deepEqual(d1, d2);
+  assert.notDeepEqual(d1, buildDataset({ seed: 998, trainSize: 100, testSize: 100 }));
+});
+
+test('buildDataset: every sample carries the contract and legitimate splits are independent objects', () => {
+  const dataset = buildDataset({
+    seed: 42,
+    trainSize: 20,
+    calibrationSize: 20,
+    testSize: 100,
+    prevalence: 0.5,
+    hardShare: 0.2,
+  });
+  const samples = [...dataset.train, ...dataset.calibration, ...dataset.test];
+  const variants = {
+    legit: ['typical', 'hard'],
+    attack: ['canonical', 'obfuscated', 'novel'],
+  };
+  for (const sample of samples) {
+    assert.deepEqual(Object.keys(sample).sort(), ['kind', 'label', 'request', 'variant']);
+    assert.ok(Object.hasOwn(variants, sample.label));
+    assert.ok(variants[sample.label].includes(sample.variant));
+    assert.equal(typeof sample.kind, 'string');
+    assert.ok(sample.kind.length > 0);
+    assert.equal(typeof sample.request.method, 'string');
+    assert.equal(typeof sample.request.path, 'string');
+    assert.ok(Object.values(sample.request.params).every((value) => typeof value === 'string'));
+  }
+  assert.equal(new Set(samples).size, samples.length);
+  assert.equal(new Set(samples.map((sample) => sample.request)).size, samples.length);
+  assert.ok(
+    dataset.train.every((sample) => sample.label === 'legit' && sample.variant === 'typical'),
+  );
+  assert.ok(
+    dataset.calibration.every((sample) => sample.label === 'legit' && sample.variant === 'typical'),
+  );
+});
+
+test('buildDataset: prevalence counts round and increase monotonically', () => {
+  const counts = [0, 0.1, 0.5, 1].map((prevalence) => {
+    const { test: samples } = buildDataset({
+      seed: 7,
+      trainSize: 0,
+      calibrationSize: 0,
+      testSize: 10,
+      prevalence,
+    });
+    return samples.filter((sample) => sample.label === 'attack').length;
+  });
+  assert.deepEqual(counts, [0, 1, 5, 10]);
+  const { test: samples } = buildDataset({
+    seed: 7,
+    trainSize: 0,
+    calibrationSize: 0,
+    testSize: 5,
+    prevalence: 0.5,
+  });
+  assert.equal(samples.filter((sample) => sample.label === 'attack').length, 3);
+});
+
+test('buildDataset: validates seed, sizes and prevalence before generating samples', () => {
+  const empty = { trainSize: 0, calibrationSize: 0, testSize: 0 };
+  for (const seed of [0, 0xffffffff]) {
+    assert.deepEqual(buildDataset({ ...empty, seed }), {
+      seed,
+      train: [],
+      calibration: [],
+      test: [],
+    });
+  }
+  for (const seed of [undefined, -1, 0x100000000, 1.5, NaN, Infinity, '1', null]) {
+    assert.throws(
+      () => buildDataset({ ...empty, seed }),
+      /seed must be an unsigned 32-bit integer/,
+    );
+  }
+  for (const name of ['trainSize', 'calibrationSize', 'testSize']) {
+    for (const size of [-1, 1.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1, '1', null]) {
+      assert.throws(() => buildDataset({ ...empty, seed: 1, [name]: size }), RangeError);
+    }
+  }
+  for (const prevalence of [-0.1, 1.1, NaN, Infinity, '0.1', null]) {
+    assert.throws(() => buildDataset({ ...empty, seed: 1, prevalence }), RangeError);
+  }
 });
 
 test('hard fixtures are legitimate requests with existing endpoint shapes and varied inputs', () => {
