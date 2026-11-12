@@ -1,6 +1,6 @@
 // Generators for simulated requests. Legitimate traffic is built from innocuous word pools;
 // malicious traffic uses a few canonical, public example strings as MEASUREMENT SUBJECTS only —
-// they are never executed, parsed, or sent anywhere (ADR-001). Extend both pools in A-02/A-03/A-04.
+// they are never executed, parsed, or sent anywhere (ADR-001). A-03/A-04 extend the attack pool.
 // Pure, runtime-agnostic (takes an Rng so it stays reproducible).
 //
 // Dataset contract (ADR-006):
@@ -15,59 +15,151 @@
 /** @typedef {import('./rng.js').Rng} Rng */
 /** @typedef {'canonical' | 'obfuscated' | 'novel'} AttackVariant */
 
+import { weightedIndex, geometric, textLength } from './distributions.js';
+
+// Ranked vocabulary: rarer fragments introduce punctuation, numbers and other scripts naturally.
 const WORDS = [
-  'red',
-  'blue',
-  'green',
-  'shoes',
-  'hat',
-  'coat',
-  'socks',
-  'jacket',
-  'warm',
-  'cotton',
-  'summer',
-  'winter',
-  'sale',
+  'the',
+  'order',
+  'is',
+  'good',
+  'please',
   'new',
+  'product',
+  'and',
+  'delivery',
+  'thank',
+  'you',
+  'blue',
+  'cotton',
+  'shoes',
+  'sale',
+  'size',
+  'winter',
+  'summer',
+  'price',
+  'today',
+  'hello',
+  "l'ordine",
+  "O'Brien",
+  'café',
+  '東京',
+  'مرحبا',
+  '€12.50',
+  '2026-11-01',
+  'SKU-42',
+  'https://example.com/item',
+  'great!',
+  'really?',
+  'note:',
+  'yes,',
+  'fine.',
 ];
-const NAMES = ['mario', 'giulia', 'alex', 'sam', 'lea', 'noa', "o'brien", 'müller'];
-const PATHS = ['/search', '/login', '/products', '/cart', '/profile', '/comments'];
+const WORD_WEIGHTS = WORDS.map((_, i) => 1 / (i + 1));
+const NAMES = ['Ari', 'Noa', 'Sam', 'Mika', "O'Brien", 'Élo', '東京', 'مرحبا'];
+const EMAIL_PARTS = ['sample1', 'visitor2', 'example3', 'guest4', 'user5'];
+const PASSWORD_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#-_.?';
+const ENDPOINTS = ['search', 'products', 'cart', 'login', 'profile', 'comments'];
+const ENDPOINT_WEIGHTS = [25, 20, 15, 15, 10, 15];
+
+function word(rng) {
+  return WORDS[weightedIndex(rng, WORD_WEIGHTS)];
+}
+
+// The final slice makes the generated UTF-16 length match the sampled length exactly.
+function text(rng) {
+  const length = textLength(rng);
+  let result = '';
+  while (result.length < length) {
+    const subject = word(rng);
+    const detail = word(rng);
+    const sentence = rng.pick([
+      `Please check ${subject}: ${detail}.`,
+      `I liked ${subject}, thank you!`,
+      `Is ${subject} available? ${detail}.`,
+      `My note about ${subject}: ${detail}.`,
+    ]);
+    result += (result ? ' ' : '') + sentence;
+  }
+  return result.slice(0, length);
+}
+
+function password(rng) {
+  const length = rng.int(8, 24);
+  return Array.from({ length }, () => PASSWORD_CHARS[rng.int(0, PASSWORD_CHARS.length - 1)]).join(
+    '',
+  );
+}
 
 /**
- * A legitimate request: a realistic search / login / pagination / form submission.
+ * Generate a request from the synthetic probability model in methods.md §0.
  * @param {Rng} rng
  * @returns {{ request: AgRequest, label: 'legit', kind: string, variant: 'typical' }}
  */
 export function makeLegitRequest(rng) {
-  const kind = rng.pick(['search', 'login', 'pagination', 'form']);
+  const kind = ENDPOINTS[weightedIndex(rng, ENDPOINT_WEIGHTS)];
   /** @type {AgRequest} */
   let request;
   switch (kind) {
+    case 'search':
+      request = {
+        method: 'GET',
+        path: '/search',
+        params: {
+          q: Array.from({ length: rng.int(1, 4) }, () => word(rng)).join(' '),
+          page: String(geometric(rng, 0.35)),
+        },
+      };
+      break;
+    case 'products':
+      request = {
+        method: 'GET',
+        path: '/products',
+        params: {
+          id: String(rng.int(1, 9999)),
+          sort: rng.pick(['popular', 'price', 'new']),
+        },
+      };
+      break;
+    case 'cart':
+      request = {
+        method: 'POST',
+        path: '/cart',
+        params: {
+          id: String(rng.int(1, 9999)),
+          qty: String(geometric(rng, 0.5)),
+        },
+      };
+      break;
     case 'login':
       request = {
         method: 'POST',
         path: '/login',
-        params: { user: rng.pick(NAMES), pass: 'pw' + rng.int(1000, 999999) },
+        params: {
+          user: rng.pick(NAMES),
+          pass: password(rng),
+        },
       };
       break;
-    case 'pagination':
-      request = { method: 'GET', path: rng.pick(PATHS), params: { page: String(rng.int(1, 50)) } };
+    case 'profile':
+      request = {
+        method: 'POST',
+        path: '/profile',
+        params: {
+          email: rng.pick(EMAIL_PARTS) + '@example.com',
+          bio: text(rng),
+        },
+      };
       break;
-    case 'form': {
-      const words = Array.from({ length: rng.int(2, 12) }, () => rng.pick(WORDS)).join(' ');
+    default:
       request = {
         method: 'POST',
         path: '/comments',
-        params: { name: rng.pick(NAMES), body: words },
+        params: {
+          name: rng.pick(NAMES),
+          body: text(rng),
+        },
       };
-      break;
-    }
-    case 'search':
-    default: {
-      const q = Array.from({ length: rng.int(1, 4) }, () => rng.pick(WORDS)).join(' ');
-      request = { method: 'GET', path: '/search', params: { q } };
-    }
   }
   return { request, label: 'legit', kind, variant: 'typical' };
 }
