@@ -1,10 +1,17 @@
 // Detection quality of one run, for evaluation.html (E-06, and the ROC of E-02 — theme T3): the
-// error rates with their 95% Wilson intervals, the results by variant, and the ROC curve of every
-// mode on the same test requests. Pure: no DOM, tested in Node; the page only renders it.
+// error rates with their 95% Wilson intervals, the results by variant, the ROC curve of every
+// mode on the same test requests, and McNemar's test between the modes (D-07). Pure: no DOM,
+// tested in Node; the page only renders it.
 
 import { detect } from '@anomaly-guard/core';
 import { createRng } from '@anomaly-guard/traffic';
-import { rocCurve, wilsonInterval, bootstrapAucInterval } from '@anomaly-guard/evaluation';
+import {
+  rocCurve,
+  wilsonInterval,
+  bootstrapAucInterval,
+  mcnemarTest,
+} from '@anomaly-guard/evaluation';
+import { operatingPoint } from './pipeline.js';
 
 /** The modes on the ROC chart, in legend order. */
 export const ROC_MODES = Object.freeze(['rules', 'stats', 'combined']);
@@ -99,4 +106,40 @@ export function rocByMode({ dataset, ruleEngine, model }) {
 export function aucInterval(scored, seed, resamples = BROWSER_RESAMPLES) {
   const random = createRng((seed + 0x80000000) >>> 0).next;
   return bootstrapAucInterval(scored, { random, resamples });
+}
+
+/** The pairs of modes compared by McNemar's test, [A, B]: the same as in the experiments. */
+export const PAIRS = Object.freeze([
+  ['stats', 'combined'],
+  ['rules', 'combined'],
+  ['rules', 'stats'],
+]);
+
+/**
+ * McNemar's test between every pair of modes on the same test requests, each mode at its own
+ * operating point for the current target (D-07). Attacks and legitimate requests apart: on
+ * attacks, flagging more means catching more; on legitimate requests, more false alarms.
+ * @param {ReturnType<typeof import('./pipeline.js').runExperiment>} run
+ * @param {NonNullable<ReturnType<typeof rocByMode>>} curves  their test scores are reused
+ * @returns {{ modes: string[], attack: ReturnType<typeof mcnemarTest>,
+ *   legit: ReturnType<typeof mcnemarTest> }[]}  onlyA: requests that A flags and B does not
+ */
+export function pairedComparison(run, curves) {
+  const { state, dataset, ruleEngine, model } = run;
+  /** @type {Record<string, boolean[]>} */
+  const flagged = {};
+  for (const { mode, scored } of curves) {
+    const point =
+      mode === state.mode
+        ? run.operating
+        : operatingPoint({ ...state, mode }, dataset.calibration, { ruleEngine, model });
+    const cut = mode === 'rules' ? 1 : point.threshold; // rules mode: 1 on a rule match
+    flagged[mode] = scored.map((s) => s.score >= cut);
+  }
+  const only = (values, label) => values.filter((_v, j) => dataset.test[j].label === label);
+  return PAIRS.map(([a, b]) => ({
+    modes: [a, b],
+    attack: mcnemarTest(only(flagged[a], 'attack'), only(flagged[b], 'attack')),
+    legit: mcnemarTest(only(flagged[a], 'legit'), only(flagged[b], 'legit')),
+  }));
 }

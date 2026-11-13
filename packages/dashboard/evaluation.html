@@ -100,6 +100,24 @@
           </section>
         </div>
 
+        <section class="panel" aria-labelledby="paired-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="paired-title">Paired comparison (McNemar)</h2>
+            <span class="panel-meta"
+              >the same test requests · each detector at its own threshold for this target</span
+            >
+          </div>
+          <div class="panel-body">
+            <div class="table-wrap" id="paired"></div>
+            <p class="note">
+              Only the requests where two detectors disagree count. If both were equally good, each
+              disagreement would be a coin flip, and the exact p-value says how surprising the split
+              is (D-07). Attacks and legitimate requests are compared apart: on attacks, flagging
+              more means catching more; on legitimate requests, more false alarms.
+            </p>
+          </div>
+        </section>
+
         <!-- include: partials/footer.html -->
       </main>
     </div>

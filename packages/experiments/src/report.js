@@ -106,8 +106,22 @@ export function formatReport({ provenance, config, summary }) {
       '',
       ...groupTable(modes, i, 'byKind', (_label, names) => names),
       '',
+      '### Paired comparison (McNemar, D-07)',
+      '',
+      'Each mode at its own threshold for this target, on the same test requests. On attacks, ' +
+        'flagging more means catching more; on legitimate requests, more false alarms.',
+      '',
+      '| A vs B | Requests | Flagged only by A | Flagged only by B | Exact p, seeds pooled | Seeds with p < 0.05 |',
+      '| --- | --- | --- | --- | --- | --- |',
+      ...comparisonRows(summary.comparisons[i]),
+      '',
     );
   });
+
+  const tests = summary.comparisons.reduce(
+    (count, c) => count + c.pairs.length * Object.keys(c.pairs[0].groups).length,
+    0,
+  );
 
   out.push(
     '## Notes',
@@ -125,8 +139,34 @@ export function formatReport({ provenance, config, summary }) {
       'requests can be higher.',
     '- For attacks the group rate is the detection rate; for legitimate requests it is the ' +
       'false-positive rate.',
+    `- McNemar: ${tests} pooled tests in all. With a Bonferroni correction a difference counts ` +
+      `at p < 0.05/${tests} ≈ ${(0.05 / tests).toFixed(4)}. The exact p is shown; the χ² form ` +
+      'with continuity correction is in `results.json`.',
   );
   return `${out.join('\n')}\n`;
+}
+
+const GROUP_TEXT = { attack: 'attacks', novel: 'novel attacks', legit: 'legitimate' };
+
+/** One row per pair and group: the disagreements, the pooled exact p, the significant seeds. */
+function comparisonRows({ pairs }) {
+  return pairs.flatMap(({ modes: [a, b], groups }) =>
+    Object.entries(groups).map(([name, g]) => {
+      const seeds = [
+        g.seedsMoreA ? `${a} flags more in ${g.seedsMoreA}` : '',
+        g.seedsMoreB ? `${b} flags more in ${g.seedsMoreB}` : '',
+      ].filter(Boolean);
+      return (
+        `| ${a} vs ${b} | ${GROUP_TEXT[name] ?? name} | ${int(g.onlyA)} | ${int(g.onlyB)} | ` +
+        `${pValue(g.exactP)} | ${seeds.length ? seeds.join('; ') : 'none'} |`
+      );
+    }),
+  );
+}
+
+/** p-value for a table: three decimals, or "< 0.001". */
+function pValue(p) {
+  return p < 0.001 ? '< 0.001' : p.toFixed(3);
 }
 
 /**

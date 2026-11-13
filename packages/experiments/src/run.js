@@ -1,8 +1,9 @@
 // The D-04 experiment (ADR-009). For every seed: build a fresh dataset, fit the statistical model
 // on its legitimate training split (ADR-004), set one threshold per mode and target FPR on its
 // legitimate calibration split (D-06), then score its test split once and measure the result
-// with intervals (D-03, D-05). Finally summarise across seeds. No file system here: cli.js writes
-// the files, so this part can be tested on its own.
+// with intervals (D-03, D-05), and compare the modes pairwise on the same requests (McNemar,
+// D-07). Finally summarise across seeds. No file system here: cli.js writes the files, so this
+// part can be tested on its own.
 
 import { RuleEngine, trainStatModel, detect } from '@anomaly-guard/core';
 import { buildDataset, createRng } from '@anomaly-guard/traffic';
@@ -12,9 +13,29 @@ import {
   wilsonInterval,
   bootstrapAucInterval,
   meanInterval,
+  mcnemarTest,
+  mcnemarFromCounts,
 } from '@anomaly-guard/evaluation';
 
 export const MODES = ['rules', 'stats', 'combined'];
+
+/** The pairs of modes compared on the same requests (D-07): [A, B]. */
+export const PAIRS = Object.freeze([
+  ['stats', 'combined'],
+  ['rules', 'combined'],
+  ['rules', 'stats'],
+]);
+
+/**
+ * The groups each pair is compared on. Attacks and legitimate requests apart: on attacks,
+ * flagging more means catching more; on legitimate requests it means more false alarms. Novel
+ * attacks are the research question: what the statistics catch without a signature.
+ */
+const GROUPS = Object.freeze({
+  attack: (s) => s.label === 'attack',
+  novel: (s) => s.label === 'attack' && s.variant === 'novel',
+  legit: (s) => s.label === 'legit',
+});
 
 /**
  * @typedef {Object} ExperimentConfig
@@ -83,6 +104,8 @@ export function runSeed(seed, config) {
 
   /** @type {Record<string, { auc: ReturnType<typeof bootstrapAucInterval>, points: ReturnType<typeof operatingPoint>[] }>} */
   const modes = {};
+  /** @type {Record<string, { score: number }[]>} */
+  const scoredBy = {};
   for (const mode of MODES) {
     // Only the score is used: it is compared with the calibrated threshold below, so the
     // threshold passed to detect (which only sets its verdict) does not matter.
@@ -95,6 +118,7 @@ export function runSeed(seed, config) {
       variant: s.variant,
       score: scoreOf(s),
     }));
+    scoredBy[mode] = scored;
     modes[mode] = {
       // Every mode gets the same resamples (same seed, same order): a paired bootstrap.
       auc: bootstrapAucInterval(scored, { random: createRng(bootstrapSeed).next, resamples }),
@@ -103,7 +127,29 @@ export function runSeed(seed, config) {
       ),
     };
   }
-  return { seed, bootstrapSeed, modes };
+
+  // McNemar on the same test requests, each mode at its own operating point for the target.
+  const comparisons = targets.map((target, i) => {
+    const flagged = (mode) => scoredBy[mode].map((s) => s.score >= modes[mode].points[i].threshold);
+    return {
+      target,
+      pairs: PAIRS.map(([first, second]) => {
+        const a = flagged(first);
+        const b = flagged(second);
+        /** @type {Record<string, ReturnType<typeof mcnemarTest>>} */
+        const groups = {};
+        for (const [name, inGroup] of Object.entries(GROUPS)) {
+          const members = test.map((s, j) => (inGroup(s) ? j : -1)).filter((j) => j >= 0);
+          groups[name] = mcnemarTest(
+            members.map((j) => a[j]),
+            members.map((j) => b[j]),
+          );
+        }
+        return { modes: [first, second], groups };
+      }),
+    };
+  });
+  return { seed, bootstrapSeed, modes, comparisons };
 }
 
 /**
@@ -213,7 +259,35 @@ function summarise(seedResults, config) {
       ),
     };
   }
-  return { modes };
+  return { modes, comparisons: summariseComparisons(seedResults, config) };
+}
+
+/**
+ * McNemar across seeds: the disagreement counts added up (under the null hypothesis each seed's
+ * count is Binomial(n, ½), so the sum is too) and the number of seeds where each mode flags
+ * significantly more (exact p < 0.05).
+ * @param {ReturnType<typeof runSeed>[]} seedResults
+ * @param {ExperimentConfig} config
+ */
+function summariseComparisons(seedResults, config) {
+  return config.targets.map((target, i) => ({
+    target,
+    pairs: PAIRS.map(([first, second], p) => {
+      /** @type {Record<string, any>} */
+      const groups = {};
+      for (const name of Object.keys(GROUPS)) {
+        const perSeed = seedResults.map((r) => r.comparisons[i].pairs[p].groups[name]);
+        const total = (key) => perSeed.reduce((sum, g) => sum + g[key], 0);
+        const significant = perSeed.filter((g) => g.exactP < 0.05);
+        groups[name] = {
+          ...mcnemarFromCounts(total('onlyA'), total('onlyB')),
+          seedsMoreA: significant.filter((g) => g.onlyA > g.onlyB).length,
+          seedsMoreB: significant.filter((g) => g.onlyB > g.onlyA).length,
+        };
+      }
+      return { modes: [first, second], groups };
+    }),
+  }));
 }
 
 /** @param {ReturnType<typeof operatingPoint>[]} points  one per seed, same mode and target */

@@ -8,8 +8,10 @@ import {
   byVariant,
   rocByMode,
   aucInterval,
+  pairedComparison,
   ROC_MODES,
   BROWSER_RESAMPLES,
+  PAIRS,
 } from '../src/quality.js';
 
 const run = runExperiment({ ...DEFAULTS, size: 600 });
@@ -76,4 +78,29 @@ test('aucInterval: seeded and reproducible, and it brackets the AUC', () => {
   assert.notDeepEqual(a, aucInterval(curve.scored, 43, 50));
   assert.ok(a.lower <= curve.auc && curve.auc <= a.upper);
   assert.equal(aucInterval(curve.scored, 42).resamples, BROWSER_RESAMPLES);
+});
+
+test('pairedComparison: McNemar on attacks and on legitimate requests, each mode at its threshold', () => {
+  const curves = rocByMode(run);
+  const pairs = pairedComparison(run, curves);
+  assert.deepEqual(
+    pairs.map((p) => p.modes),
+    PAIRS,
+  );
+  // The current mode at the run's own threshold: its alerts are the events' alerts.
+  const current = curves.find((c) => c.mode === run.state.mode);
+  const alerts = current.scored.map((s) => s.score >= run.operating.threshold);
+  assert.deepEqual(
+    alerts,
+    run.events.map((e) => e.alert),
+  );
+  for (const { attack, legit } of pairs) {
+    assert.ok(attack.onlyA + attack.onlyB <= run.cm.tp + run.cm.fn);
+    assert.ok(legit.onlyA + legit.onlyB <= run.cm.fp + run.cm.tn);
+    assert.ok(attack.exactP > 0 && attack.exactP <= 1);
+  }
+  // Whatever the rules flag, combined flags too (a rule match scores +∞).
+  const rules = pairs.find((p) => p.modes[0] === 'rules' && p.modes[1] === 'combined');
+  assert.equal(rules.attack.onlyA, 0);
+  assert.equal(rules.legit.onlyA, 0);
 });

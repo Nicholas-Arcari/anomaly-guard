@@ -18,6 +18,8 @@ import {
   bootstrapAucInterval, // seeded, stratified bootstrap interval for the AUC (D-05)
   meanInterval, // 95% Student-t interval for the mean of per-seed values (D-04)
   studentTQuantile, // quantile of Student's t, e.g. (0.975, 19) → 2.093
+  mcnemarTest, // paired comparison of two detectors on the same requests (D-07)
+  mcnemarFromCounts, // the same from the two disagreement counts, e.g. added up over seeds
   Z_95, // 1.96
 } from '@anomaly-guard/evaluation';
 ```
@@ -48,7 +50,7 @@ Implemented: confusion matrix, precision/recall/F1/FPR/FNR, single-threshold eva
 base-rate PPV helper, and `thresholdAtFpr`, the threshold from the legit-only calibration split at
 a target FPR (D-06, ADR-009), `rocCurve` with its AUC (D-03), and the confidence intervals (D-05):
 Wilson for rates, a seeded stratified bootstrap for the AUC, and `meanInterval` across seeds
-(D-04). The experiment runner that uses all of this lives in a separate Node-only workspace,
+(D-04), and McNemar's test for two detectors on the same requests (D-07). The experiment runner that uses all of this lives in a separate Node-only workspace,
 [`packages/experiments`](../experiments) (D-04).
 
 ## Test

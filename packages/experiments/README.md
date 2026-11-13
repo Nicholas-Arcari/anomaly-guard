@@ -17,8 +17,9 @@ npm run experiments -- --help          # every option
 It prints where it wrote two files, `results/<date>-<commit>/`:
 
 - `report.md`: the tables for the written report: AUC; then for each target FPR the operating
-  point of each mode, the spread across seeds, the confusion matrix added up over the seeds, and
-  the detection and false-positive rates by variant and by attack family / endpoint.
+  point of each mode, the spread across seeds, the confusion matrix added up over the seeds, the
+  detection and false-positive rates by variant and by attack family / endpoint, and McNemar's
+  test between the modes (D-07).
 - `results.json`: every number, seed by seed (with its Wilson and bootstrap intervals), the
   summary across seeds, the configuration and the provenance: date, git commit, whether the tree
   had uncommitted changes, Node version.
@@ -39,10 +40,13 @@ and the run says so.
 5. Score the test split once at that threshold: confusion matrix, TPR / FPR / FNR / precision
    with Wilson intervals, the same by variant and by kind; AUC with a seeded, stratified bootstrap
    interval (D-03, D-05).
+6. Compare the modes in pairs on the same test requests, each at its own threshold: McNemar's
+   test on attacks, on novel attacks and on legitimate requests (D-07).
 
 Across seeds it reports the mean, SD and range of each value and a 95% Student-t interval for the
 mean (`meanInterval`): the seed is the independent unit, so the counts are not pooled into one
-Wilson interval (methods.md §6).
+Wilson interval (methods.md §6). McNemar is the exception: its disagreement counts are added up
+over the seeds, which the null hypothesis allows.
 
 ## Defaults
 

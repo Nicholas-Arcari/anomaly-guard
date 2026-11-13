@@ -2,7 +2,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { RuleEngine, trainStatModel, detect } from '@anomaly-guard/core';
 import { buildDataset } from '@anomaly-guard/traffic';
-import { rocCurve, thresholdAtFpr, meanInterval } from '@anomaly-guard/evaluation';
+import {
+  rocCurve,
+  thresholdAtFpr,
+  meanInterval,
+  mcnemarFromCounts,
+} from '@anomaly-guard/evaluation';
 import {
   runExperiment,
   runSeed,
@@ -10,6 +15,7 @@ import {
   bootstrapSeedFor,
   DEFAULT_CONFIG,
   MODES,
+  PAIRS,
 } from '../src/run.js';
 
 // Small sizes so the tests stay fast; the real configuration is DEFAULT_CONFIG.
@@ -143,6 +149,54 @@ test('runExperiment: reproducible, and the summary is computed from the seeds', 
       assert.equal(typical.seeds, seeds.length);
     });
   }
+});
+
+test('runSeed: McNemar compares two modes on the same requests, each at its threshold (D-07)', () => {
+  const seed = SMALL.seeds[0];
+  const result = experiment.seeds[0];
+  const { test: requests } = buildDataset({ seed, ...sizes(SMALL) });
+  const scores = Object.fromEntries(MODES.map((mode) => [mode, rescore(seed, SMALL, mode).test]));
+  const attacks = requests.map((_s, j) => j).filter((j) => requests[j].label === 'attack');
+  SMALL.targets.forEach((_target, i) => {
+    assert.deepEqual(
+      result.comparisons[i].pairs.map((p) => p.modes),
+      PAIRS,
+    );
+    for (const { modes: pair, groups } of result.comparisons[i].pairs) {
+      const flagged = (mode, j) => scores[mode][j].score >= result.modes[mode].points[i].threshold;
+      const [first, second] = pair;
+      const onlyFirst = attacks.filter((j) => flagged(first, j) && !flagged(second, j)).length;
+      const onlySecond = attacks.filter((j) => !flagged(first, j) && flagged(second, j)).length;
+      assert.deepEqual(groups.attack, mcnemarFromCounts(onlyFirst, onlySecond), pair.join(' vs '));
+      assert.ok(groups.novel.onlyA <= groups.attack.onlyA);
+      assert.ok(groups.novel.onlyB <= groups.attack.onlyB);
+    }
+    // A rule match scores +∞ in combined mode, so whatever the rules flag, combined flags too.
+    const rulesVsCombined = result.comparisons[i].pairs.find(
+      (p) => p.modes[0] === 'rules' && p.modes[1] === 'combined',
+    );
+    assert.equal(rulesVsCombined.groups.attack.onlyA, 0);
+    assert.equal(rulesVsCombined.groups.legit.onlyA, 0);
+  });
+});
+
+test('runExperiment: McNemar pooled over the seeds adds up their disagreements', () => {
+  const { seeds, summary } = experiment;
+  summary.comparisons.forEach((comparison, i) => {
+    comparison.pairs.forEach((pair, p) => {
+      for (const [name, pooled] of Object.entries(pair.groups)) {
+        const perSeed = seeds.map((r) => r.comparisons[i].pairs[p].groups[name]);
+        const total = (key) => perSeed.reduce((sum, g) => sum + g[key], 0);
+        const { onlyA, onlyB, exactP } = mcnemarFromCounts(total('onlyA'), total('onlyB'));
+        assert.deepEqual([pooled.onlyA, pooled.onlyB, pooled.exactP], [onlyA, onlyB, exactP]);
+        assert.ok(pooled.seedsMoreA + pooled.seedsMoreB <= seeds.length);
+        assert.equal(
+          pooled.seedsMoreA,
+          perSeed.filter((g) => g.exactP < 0.05 && g.onlyA > g.onlyB).length,
+        );
+      }
+    });
+  });
 });
 
 test('bootstrapSeedFor: a different, valid seed for every dataset seed', () => {

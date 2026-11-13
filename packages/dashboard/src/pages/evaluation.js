@@ -5,7 +5,13 @@
 
 import { initShell, percent } from '../shell.js';
 import { runExperiment } from '../pipeline.js';
-import { ratesWithIntervals, byVariant, rocByMode, aucInterval } from '../quality.js';
+import {
+  ratesWithIntervals,
+  byVariant,
+  rocByMode,
+  aucInterval,
+  pairedComparison,
+} from '../quality.js';
 import { h, mount, fmt } from '../dom.js';
 import { kpi } from '../ui.js';
 import { setupCharts, rocChart, token } from '../charts.js';
@@ -238,6 +244,7 @@ if (curves === null) {
     h('p', { class: 'empty-chart' }, 'A ROC curve needs both attacks and legitimate requests.'),
   );
   mount('#auc', h('p', { class: 'muted' }, 'Set an attack share between 0 and 1.'));
+  mount('#paired', h('p', { class: 'muted' }, 'Needs both attacks and legitimate requests.'));
 } else {
   setupCharts();
   const color = (mode) => token(MODE_COLORS[mode]);
@@ -302,4 +309,54 @@ if (curves === null) {
       intervalCells[i].className = 'num';
     }, 0);
   });
+}
+
+// ---- paired comparison (McNemar, D-07) -------------------------------------------------------
+
+if (curves !== null) {
+  /** p-value for the table: bold when below 0.05. */
+  const pCell = (test) =>
+    h(
+      'td',
+      { class: 'num' },
+      test.exactP < 0.05
+        ? h('strong', {}, test.exactP < 0.001 ? '< 0.001' : test.exactP.toFixed(3))
+        : test.exactP.toFixed(3),
+    );
+  const head = (...labels) => labels.map((label) => h('th', { scope: 'col', class: 'num' }, label));
+  mount(
+    '#paired',
+    h(
+      'table',
+      { class: 'data' },
+      h(
+        'thead',
+        {},
+        h(
+          'tr',
+          {},
+          h('th', { scope: 'col' }, 'A vs B'),
+          head('Attacks caught only by A', 'only by B', 'p'),
+          head('False alarms only by A', 'only by B', 'p'),
+        ),
+      ),
+      h(
+        'tbody',
+        {},
+        pairedComparison(run, curves).map(({ modes: [a, b], attack, legit }) =>
+          h(
+            'tr',
+            {},
+            h('td', {}, `${MODE_NAMES[a]} vs ${MODE_NAMES[b]}`),
+            h('td', { class: 'num' }, fmt.int(attack.onlyA)),
+            h('td', { class: 'num' }, fmt.int(attack.onlyB)),
+            pCell(attack),
+            h('td', { class: 'num' }, fmt.int(legit.onlyA)),
+            h('td', { class: 'num' }, fmt.int(legit.onlyB)),
+            pCell(legit),
+          ),
+        ),
+      ),
+    ),
+  );
 }
