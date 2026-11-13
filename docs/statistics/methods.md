@@ -336,6 +336,26 @@ confusion matrix:            metrics:
   - **Provenance:** `results/<date>-<commit>/results.json` records the seeds, the git commit
     (and whether the tree had uncommitted changes), the split sizes, prevalence, hard-case share,
     targets and resamples; `report.md` holds the tables.
+- **Paired comparison of two modes (D-07, `mcnemarTest`).** Two detectors scored on the same
+  requests are not independent samples, so two separate intervals would waste the pairing.
+  McNemar's test uses only the requests where they disagree: `b` flagged by A only, `c` by B only.
+  If both were equally good, each disagreement would be a coin flip: `b ~ Binomial(b + c, ½)`.
+  - **Exact two-sided p** (the one reported): `p = min(1, 2·P(X ≤ min(b, c)))` with
+    `X ~ Binomial(b + c, ½)`, computed as `P(X ≤ k) = I_½(n − k, k + 1)` (regularized incomplete
+    beta).
+  - **Textbook form:** `χ² = (|b − c| − 1)² / (b + c)` on 1 degree of freedom, with continuity
+    correction; close to the exact p once `b + c ≳ 25`.
+  - **Attacks and legitimate requests apart.** On attacks, "flagged by A only" means caught only by
+    A; on legitimate requests it means a false alarm only from A. On all requests together the
+    test would compare accuracy, which the class imbalance makes misleading. Novel attacks get
+    their own test: they are the research question.
+  - **Operating points:** each mode at its own calibrated threshold for the same target FPR, so the
+    detectors are compared as they would be deployed.
+  - **Across seeds** the disagreement counts are added up: under the null hypothesis each seed's
+    `b` is Binomial(`b + c`, ½), so the sums are too. The report also counts the seeds where each
+    mode is significantly ahead (p < 0.05).
+  - **Many tests:** 3 pairs × 3 groups × 2 targets = 18. With a Bonferroni correction a difference
+    counts at p < 0.05/18 ≈ 0.003.
 - Always show the confusion matrix and both error rates, never accuracy alone (standards §3), and
   break the results down by `variant` (canonical / obfuscated / novel attacks, typical / hard
   legitimate requests).

@@ -95,15 +95,15 @@
 
 ## 6. D — Evaluation (`packages/evaluation`, `packages/experiments`)
 
-| ID   | Task                                                                                                                                                                                                                 | Theme | Depends on       | Status   |
-| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- | ---------------- | -------- |
-| D-01 | Confusion matrix + precision/recall/F1/FPR/FNR (+ tests)                                                                                                                                                             | T3    | F-01             | Done     |
-| D-02 | Base-rate / PPV helper (Bayes) (+ test)                                                                                                                                                                              | T4    | D-01             | Done     |
-| D-03 | ROC curve + AUC (threshold sweep; handles ties and `+Infinity` scores)                                                                                                                                               | T3    | D-01             | Done     |
-| D-04 | Experiment runner in a new Node-only workspace `packages/experiments`: ≥ 20 seeds; rules / stats / combined; per-variant breakdown; at target FPR 1% and 0.1%, plus ROC/AUC; writes `results/` with seeds and commit | T3    | D-03, D-05, D-06 | Done     |
-| D-05 | Confidence intervals: `wilsonInterval` for rates; seeded bootstrap for AUC (methods §6)                                                                                                                              | T3    | D-01             | Done     |
-| D-06 | `thresholdAtFpr(legitScores, targetFpr)` on the calibration split (ADR-009); tests with ties                                                                                                                         | T3    | D-01             | Done     |
-| D-07 | Paired comparison of two modes on the same test requests (e.g. stats vs combined): McNemar's test on the requests where only one of the two is right                                                                 | T3    | D-04             | Proposed |
+| ID   | Task                                                                                                                                                                                                                 | Theme | Depends on       | Status |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- | ---------------- | ------ |
+| D-01 | Confusion matrix + precision/recall/F1/FPR/FNR (+ tests)                                                                                                                                                             | T3    | F-01             | Done   |
+| D-02 | Base-rate / PPV helper (Bayes) (+ test)                                                                                                                                                                              | T4    | D-01             | Done   |
+| D-03 | ROC curve + AUC (threshold sweep; handles ties and `+Infinity` scores)                                                                                                                                               | T3    | D-01             | Done   |
+| D-04 | Experiment runner in a new Node-only workspace `packages/experiments`: ≥ 20 seeds; rules / stats / combined; per-variant breakdown; at target FPR 1% and 0.1%, plus ROC/AUC; writes `results/` with seeds and commit | T3    | D-03, D-05, D-06 | Done   |
+| D-05 | Confidence intervals: `wilsonInterval` for rates; seeded bootstrap for AUC (methods §6)                                                                                                                              | T3    | D-01             | Done   |
+| D-06 | `thresholdAtFpr(legitScores, targetFpr)` on the calibration split (ADR-009); tests with ties                                                                                                                         | T3    | D-01             | Done   |
+| D-07 | Paired comparison of two modes on the same test requests (e.g. stats vs combined): McNemar's test on the requests where only one of the two is right                                                                 | T3    | D-04             | Done   |
 
 ## 7. E — Dashboard & report (`packages/dashboard`, `docs/`)
 
@@ -143,7 +143,7 @@ contribution for the individual grade.
 **T3 — Evaluation and uncertainty** · member: Nicholas Arcari (`Nicholas-Arcari`)
 
 - _Question:_ how often is the detector wrong, and how sure are we of those numbers?
-- _Tasks:_ D-06, D-03, D-05, D-04, B-02, E-06, and D-07 if the group agrees; charts: ROC (E-02),
+- _Tasks:_ D-06, D-03, D-05, D-04, B-02, E-06, and D-07 (agreed by the group); charts: ROC (E-02),
   confusion matrix (E-06).
 - _Statistics:_ confusion matrix and error rates; empirical quantiles (the threshold at a target
   FPR); ROC/AUC and its link to the Mann–Whitney statistic; the Wilson interval for proportions;

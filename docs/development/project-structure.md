@@ -75,14 +75,14 @@ anomaly-guard/
 The work is owned by statistical theme (T1–T4, [backlog](../planning/backlog.md) §8), not by
 workspace: a theme spans several workspaces, and the **Themes** column says who works where.
 
-| Workspace     | Area             | Themes                                                  | Key exports (planned)                                                                                                                           |
-| ------------- | ---------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `core`        | detection engine | T1 (chi-square, rules), T2 (length, outliers, detector) | `extractFeatures`, `RuleEngine`, `trainStatModel`, `scoreRequest`, `paramKey`, `pToScore`, `detect`                                             |
-| `traffic`     | data             | T4                                                      | `createRng`, `makeLegitRequest`, `makeAttackRequest`, `buildDataset` (train / calibration / test)                                               |
-| `evaluation`  | evaluation       | T3 (T4 uses `positivePredictiveValue`)                  | `confusionMatrix`, `metrics`, `thresholdAtFpr`, `rocCurve`, `wilsonInterval`, `bootstrapAucInterval`, `meanInterval`, `positivePredictiveValue` |
-| `server`      | live monitor     | T3 (B-02)                                               | Express app: `POST /ingest`, `GET /health`                                                                                                      |
-| `dashboard`   | UI               | everyone: one chart per theme                           | seven HTML pages (ADR-010); GitHub Pages build; internals in its README                                                                         |
-| `experiments` | experiment runs  | T3                                                      | `runExperiment`, `formatReport`; `npm run experiments` writes `results/<date>-<commit>/`                                                        |
+| Workspace     | Area             | Themes                                                  | Key exports (planned)                                                                                                                                          |
+| ------------- | ---------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `core`        | detection engine | T1 (chi-square, rules), T2 (length, outliers, detector) | `extractFeatures`, `RuleEngine`, `trainStatModel`, `scoreRequest`, `paramKey`, `pToScore`, `detect`                                                            |
+| `traffic`     | data             | T4                                                      | `createRng`, `makeLegitRequest`, `makeAttackRequest`, `buildDataset` (train / calibration / test)                                                              |
+| `evaluation`  | evaluation       | T3 (T4 uses `positivePredictiveValue`)                  | `confusionMatrix`, `metrics`, `thresholdAtFpr`, `rocCurve`, `wilsonInterval`, `bootstrapAucInterval`, `meanInterval`, `mcnemarTest`, `positivePredictiveValue` |
+| `server`      | live monitor     | T3 (B-02)                                               | Express app: `POST /ingest`, `GET /health`                                                                                                                     |
+| `dashboard`   | UI               | everyone: one chart per theme                           | seven HTML pages (ADR-010); GitHub Pages build; internals in its README                                                                                        |
+| `experiments` | experiment runs  | T3                                                      | `runExperiment`, `formatReport`; `npm run experiments` writes `results/<date>-<commit>/`                                                                       |
 
 ## 3. `packages/core` internals
 

@@ -9,15 +9,15 @@ detect, evaluate — with no backend, so it is hosted on **GitHub Pages** (ADR-0
 
 ## Pages
 
-| Page               | File              | Shows                                                                                                   | Theme panels still to add                             |
-| ------------------ | ----------------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Overview           | `index.html`      | key figures, alerts by severity and level, what raised them, top signatures                             | —                                                     |
-| Security events    | `events.html`     | every test request: verdict, level, reason, ground truth; filters and pages in the URL                  | —                                                     |
-| Rules              | `rules.html`      | the signature rules and how often each matched                                                          | — (the ruleset itself is B-01)                        |
-| Statistical models | `models.html`     | the signals in the score; the learned model per endpoint and parameter                                  | E-02: character classes (T1), lengths and scores (T2) |
-| Detection quality  | `evaluation.html` | the calibrated operating point, confusion matrix, rates and variants with Wilson intervals, ROC and AUC | —                                                     |
-| Base rate          | `base-rate.html`  | Bayes and the base-rate fallacy, with a worked example                                                  | E-03 (T4)                                             |
-| About              | `about.html`      | the project, the method, the themes                                                                     | —                                                     |
+| Page               | File              | Shows                                                                                                                              | Theme panels still to add                             |
+| ------------------ | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Overview           | `index.html`      | key figures, alerts by severity and level, what raised them, top signatures                                                        | —                                                     |
+| Security events    | `events.html`     | every test request: verdict, level, reason, ground truth; filters and pages in the URL                                             | —                                                     |
+| Rules              | `rules.html`      | the signature rules and how often each matched                                                                                     | — (the ruleset itself is B-01)                        |
+| Statistical models | `models.html`     | the signals in the score; the learned model per endpoint and parameter                                                             | E-02: character classes (T1), lengths and scores (T2) |
+| Detection quality  | `evaluation.html` | the calibrated operating point, confusion matrix, rates and variants with Wilson intervals, ROC and AUC, McNemar between the modes | —                                                     |
+| Base rate          | `base-rate.html`  | Bayes and the base-rate fallacy, with a worked example                                                                             | E-03 (T4)                                             |
+| About              | `about.html`      | the project, the method, the themes                                                                                                | —                                                     |
 
 ## How it is built
 

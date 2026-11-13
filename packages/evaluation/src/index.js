@@ -434,3 +434,93 @@ function logGamma(x) {
   const t = z + g + 0.5;
   return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(sum);
 }
+
+/**
+ * McNemar's test (D-07, methods.md §6): do two detectors differ on the SAME requests? Only the
+ * requests where they disagree count: `onlyA` where A says yes and B no, `onlyB` the reverse. If
+ * the two detectors are equally good, a disagreement is a coin flip: onlyA ~ Binomial(n, ½) with
+ * n = onlyA + onlyB.
+ *
+ * - `exactP`, the one to report: 2·P(X ≤ min(onlyA, onlyB)) for X ~ Binomial(n, ½), at most 1.
+ * - `chiSquare` and `chiSquareP`, the textbook form with continuity correction:
+ *   (|onlyA − onlyB| − 1)² / n on 1 degree of freedom. Close to the exact p once n ≳ 25.
+ *
+ * Pass "raised an alert" (or "was right": the test is symmetric) for attacks and for legitimate
+ * requests separately, so detection and false alarms are compared on their own. On all requests at
+ * once it would compare accuracy, which the class imbalance makes misleading.
+ *
+ * @param {boolean[]} a  one value per request for detector A
+ * @param {boolean[]} b  one value per request for detector B, same requests in the same order
+ * @returns {{ onlyA: number, onlyB: number, exactP: number, chiSquare: number, chiSquareP: number }}
+ */
+export function mcnemarTest(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
+    throw new RangeError('mcnemarTest: needs two arrays of the same length');
+  }
+  let onlyA = 0;
+  let onlyB = 0;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] && !b[i]) onlyA++;
+    else if (!a[i] && b[i]) onlyB++;
+  }
+  return mcnemarFromCounts(onlyA, onlyB);
+}
+
+/**
+ * McNemar's test from the two disagreement counts, e.g. counts added up over several seeds (each
+ * seed's onlyA is Binomial(n, ½) under the null hypothesis, so their sum is too).
+ * @param {number} onlyA  requests where A says yes and B no
+ * @param {number} onlyB  requests where B says yes and A no
+ * @returns {{ onlyA: number, onlyB: number, exactP: number, chiSquare: number, chiSquareP: number }}
+ */
+export function mcnemarFromCounts(onlyA, onlyB) {
+  for (const count of [onlyA, onlyB]) {
+    if (!Number.isSafeInteger(count) || count < 0) {
+      throw new RangeError('mcnemarFromCounts: counts must be non-negative integers');
+    }
+  }
+  const n = onlyA + onlyB;
+  if (n === 0) return { onlyA, onlyB, exactP: 1, chiSquare: 0, chiSquareP: 1 };
+  const k = Math.min(onlyA, onlyB);
+  // P(X ≤ k) for X ~ Binomial(n, ½) is I_½(n − k, k + 1); k ≤ n/2 < n here.
+  const exactP = Math.min(1, 2 * regularizedBeta(0.5, n - k, k + 1));
+  const chiSquare = Math.max(0, Math.abs(onlyA - onlyB) - 1) ** 2 / n;
+  return { onlyA, onlyB, exactP, chiSquare, chiSquareP: chiSquareTail1(chiSquare) };
+}
+
+/**
+ * P(χ² ≥ x) on 1 degree of freedom: the two tails of a standard normal beyond √x, which is
+ * erfc(√(x/2)).
+ * @param {number} x  ≥ 0
+ */
+function chiSquareTail1(x) {
+  return x === 0 ? 1 : Math.min(1, erfc(Math.sqrt(x / 2))); // the fit is only close to 1 at 0
+}
+
+/**
+ * Complementary error function, Chebyshev fit from Numerical Recipes (§6.2, erfcc): relative error
+ * below 1.2·10⁻⁷ everywhere, plenty for a p-value.
+ * @param {number} x
+ */
+function erfc(x) {
+  const z = Math.abs(x);
+  const t = 1 / (1 + 0.5 * z);
+  const poly =
+    -z * z -
+    1.26551223 +
+    t *
+      (1.00002368 +
+        t *
+          (0.37409196 +
+            t *
+              (0.09678418 +
+                t *
+                  (-0.18628806 +
+                    t *
+                      (0.27886807 +
+                        t *
+                          (-1.13520398 +
+                            t * (1.48851587 + t * (-0.82215223 + t * 0.17087277))))))));
+  const value = t * Math.exp(poly);
+  return x >= 0 ? value : 2 - value;
+}
