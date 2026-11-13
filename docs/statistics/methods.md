@@ -237,7 +237,7 @@ Use it when single features overlap but the _combination_ is unusual. Drop const
 regularise (`S + λI`) before inverting: on legitimate traffic some features never vary, which
 makes `S` singular.
 
-## 6. Evaluation — `packages/evaluation` (metrics, threshold and ROC implemented; D-05 to do)
+## 6. Evaluation — `packages/evaluation` (metrics, threshold, ROC and intervals implemented)
 
 From a labelled test set and scores, at a threshold `t` (predict "attack" when `score ≥ t`):
 
@@ -276,8 +276,9 @@ confusion matrix:            metrics:
     only operating point, and `AUC = (1 + TPR − FPR)/2`.
   - **Reading it:** AUC = 0.5 is chance, 1 is perfect separation. Because it uses only the
     ranking of the scores, AUC does not depend on the threshold.
-- **Confidence intervals (D-05).** Error rates are proportions estimated from finite samples, so
-  report them with a 95% **Wilson score interval** (`z = 1.96`, `p̂ = x/n`):
+- **Confidence intervals (D-05, `wilsonInterval`, `bootstrapAucInterval`).** Error rates are
+  proportions estimated from finite samples, so report them with a 95% **Wilson score interval**
+  (`z = 1.96`, `p̂ = x/n`):
 
   ```
   centre = (p̂ + z²/(2n)) / (1 + z²/n)
@@ -285,7 +286,22 @@ confusion matrix:            metrics:
   ```
 
   Example: 0 false positives out of 900 legitimate requests gives FPR ∈ [0, 0.43%], not "zero".
-  For AUC use a seeded bootstrap (resample the test set, ~1000 times, 2.5th–97.5th percentile).
+
+  - **Why Wilson, not the textbook Wald interval** `p̂ ± z·√(p̂(1−p̂)/n)`: Wald collapses to
+    [0, 0] when `x = 0` and can leave [0, 1]. Error rates near 0 are exactly where this project
+    lives.
+  - **AUC** is not a simple proportion, so it gets a **seeded, stratified percentile bootstrap**:
+    1. resample the attacks and the legitimate requests separately, with replacement, so each
+       resample keeps the class counts of the test set;
+    2. compute the AUC of each resample, about 1,000 times;
+    3. take the 2.5th and 97.5th percentiles of those AUCs.
+
+    The random source is passed in by the caller (`createRng(seed).next`), so the interval is
+    reproducible.
+
+  - **What they measure:** these intervals capture the uncertainty from the finite **test set**
+    of one run. How much the results move from one dataset to another is a different question,
+    answered by the repeated seeds below (D-04).
 
 - **Repeated seeds (ADR-009).** Run every configuration on at least 20 seeds and report the mean
   and spread; record seeds, git commit, split sizes, prevalence and target FPR.
