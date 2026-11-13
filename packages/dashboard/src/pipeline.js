@@ -1,14 +1,22 @@
 // The experiment behind every page (ADR-003, ADR-010): build the seeded dataset, fit the
-// statistical model on legitimate traffic only (ADR-004), run the detector over the held-out test
-// split and summarise. Pure: no DOM, tested in Node; the pages only render what it returns.
+// statistical model on legitimate traffic only (ADR-004), set the threshold on the legitimate
+// calibration split at the target false-positive rate (ADR-009, E-06), run the detector over the
+// held-out test split and summarise. Pure: no DOM, tested in Node; the pages only render what it
+// returns.
 
 import { RuleEngine, trainStatModel, detect } from '@anomaly-guard/core';
 import { buildDataset } from '@anomaly-guard/traffic';
-import { confusionMatrix, metrics } from '@anomaly-guard/evaluation';
+import { confusionMatrix, metrics, thresholdAtFpr } from '@anomaly-guard/evaluation';
 import { levelOf } from './levels.js';
 
 /** Training split size: fixed, so the URL carries few settings. */
 export const TRAIN_SIZE = 800;
+
+/** Legitimate requests the threshold is calibrated on: enough for targets down to 0.5% (state.js). */
+export const CALIBRATION_SIZE = 2000;
+
+/** Share of the legitimate test requests that are hard cases (A-05), so false positives show up. */
+export const HARD_SHARE = 0.05;
 
 /**
  * @typedef {Object} DashboardEvent
@@ -23,13 +31,32 @@ export const TRAIN_SIZE = 800;
  */
 
 /**
+ * @typedef {Object} OperatingPoint  the threshold the detector uses, and where it comes from
+ * @property {'calibrated' | 'manual' | 'rules'} source  'rules': rules mode has no threshold
+ * @property {number} threshold        what `detect` gets (ignored in rules mode)
+ * @property {number | null} target    target false-positive rate, null with a manual threshold
+ * @property {number} calibrationFpr   share of the legitimate calibration requests it flags
+ * @property {boolean | null} attainable  false when the target cannot be met (thresholdAtFpr)
+ * @property {number} calibrationSize
+ */
+
+/**
  * @param {import('./state.js').ExperimentState} state
  */
 export function runExperiment(state) {
-  const { seed, mode, threshold, prevalence, size } = state;
-  const dataset = buildDataset({ seed, trainSize: TRAIN_SIZE, testSize: size, prevalence });
+  const { seed, mode, prevalence, size } = state;
+  const dataset = buildDataset({
+    seed,
+    trainSize: TRAIN_SIZE,
+    calibrationSize: CALIBRATION_SIZE,
+    testSize: size,
+    prevalence,
+    hardShare: HARD_SHARE,
+  });
   const ruleEngine = new RuleEngine();
   const model = trainStatModel(dataset.train.map((s) => s.request)); // legitimate only (ADR-004)
+  const operating = operatingPoint(state, dataset.calibration, { ruleEngine, model });
+  const { threshold } = operating;
 
   /** @type {DashboardEvent[]} */
   const events = dataset.test.map((sample, i) => {
@@ -52,7 +79,60 @@ export function runExperiment(state) {
     events.map((e) => e.alert),
     events.map((e) => e.attack),
   );
-  return { state, dataset, model, ruleEngine, events, cm, metrics: metrics(cm) };
+  return { state, dataset, model, ruleEngine, operating, events, cm, metrics: metrics(cm) };
+}
+
+/**
+ * The operating point of the detector, from the LEGITIMATE calibration split only (ADR-009): the
+ * threshold for the target false-positive rate, or the manual threshold with the share of
+ * calibration requests it would flag. Rules mode has no threshold; its calibration FPR is the
+ * share of legitimate requests that match a rule.
+ * @param {import('./state.js').ExperimentState} state
+ * @param {{ request: any }[]} calibration  legitimate requests, never the test split
+ * @param {{ ruleEngine: RuleEngine, model: any }} detector
+ * @returns {OperatingPoint}
+ */
+export function operatingPoint(state, calibration, { ruleEngine, model }) {
+  const { mode, fpr } = state;
+  const target = fpr === 'manual' ? null : fpr;
+  // Only the score matters here: the threshold given to detect only sets its verdict.
+  const scores = calibration.map(
+    (s) => detect(s.request, { ruleEngine, model, mode, threshold: 0 }).score,
+  );
+  const n = scores.length;
+  const flagged = (cut) => scores.filter((score) => score >= cut).length;
+  if (mode === 'rules') {
+    // No threshold: rules mode scores 1 on a rule match, else 0. Do the rules alone stay within
+    // the target on legitimate traffic?
+    const matched = flagged(1);
+    return {
+      source: 'rules',
+      threshold: state.threshold, // ignored by detect in rules mode
+      target,
+      calibrationFpr: matched / n,
+      attainable: target === null ? null : matched <= Math.floor(target * n + 1e-9),
+      calibrationSize: n,
+    };
+  }
+  if (target === null) {
+    return {
+      source: 'manual',
+      threshold: state.threshold,
+      target,
+      calibrationFpr: flagged(state.threshold) / n,
+      attainable: null,
+      calibrationSize: n,
+    };
+  }
+  const calibrated = thresholdAtFpr(scores, target);
+  return {
+    source: 'calibrated',
+    threshold: calibrated.threshold,
+    target,
+    calibrationFpr: calibrated.calibrationFpr,
+    attainable: calibrated.attainable,
+    calibrationSize: n,
+  };
 }
 
 /**

@@ -67,8 +67,9 @@ export function detect(request, opts) {
     statScore = s.score;
     parts = s.parts;
     if (statScore >= threshold) {
+      // Two decimals for both: a calibrated threshold has many digits (ADR-009).
       reasons.push(
-        `statistical score ${statScore.toFixed(2)} (${s.top ?? 'none'}) ≥ threshold ${threshold}`,
+        `statistical score ${statScore.toFixed(2)} (${s.top ?? 'none'}) ≥ threshold ${threshold.toFixed(2)}`,
       );
     }
   }

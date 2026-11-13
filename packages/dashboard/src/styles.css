@@ -385,6 +385,12 @@ body[data-page='about'] [data-nav='about'] svg {
   width: 128px;
 }
 
+.querybar input[readonly] {
+  border-style: dashed;
+  background: var(--page-bg);
+  color: var(--text-subtle);
+}
+
 .querybar button {
   height: 32px;
   padding: 0 18px;
@@ -498,6 +504,10 @@ body[data-page='about'] [data-nav='about'] svg {
   height: 240px;
 }
 
+.chart-box.is-tall {
+  height: 340px;
+}
+
 .empty-chart {
   display: flex;
   align-items: center;
@@ -539,6 +549,14 @@ body[data-page='about'] [data-nav='about'] svg {
   margin-top: 4px;
   font-size: 13px;
   color: var(--text-muted);
+}
+
+.kpi-detail {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-subtle);
+  font-variant-numeric: tabular-nums;
 }
 
 .kpi.is-primary .kpi-value {

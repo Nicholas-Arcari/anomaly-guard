@@ -9,15 +9,15 @@ detect, evaluate — with no backend, so it is hosted on **GitHub Pages** (ADR-0
 
 ## Pages
 
-| Page               | File              | Shows                                                                                  | Theme panels still to add                             |
-| ------------------ | ----------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Overview           | `index.html`      | key figures, alerts by severity and level, what raised them, top signatures            | —                                                     |
-| Security events    | `events.html`     | every test request: verdict, level, reason, ground truth; filters and pages in the URL | —                                                     |
-| Rules              | `rules.html`      | the signature rules and how often each matched                                         | — (the ruleset itself is B-01)                        |
-| Statistical models | `models.html`     | the signals in the score; the learned model per endpoint and parameter                 | E-02: character classes (T1), lengths and scores (T2) |
-| Detection quality  | `evaluation.html` | confusion counts and error rates at the current settings                               | E-02: ROC (T3); E-06 (T3)                             |
-| Base rate          | `base-rate.html`  | Bayes and the base-rate fallacy, with a worked example                                 | E-03 (T4)                                             |
-| About              | `about.html`      | the project, the method, the themes                                                    | —                                                     |
+| Page               | File              | Shows                                                                                                   | Theme panels still to add                             |
+| ------------------ | ----------------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Overview           | `index.html`      | key figures, alerts by severity and level, what raised them, top signatures                             | —                                                     |
+| Security events    | `events.html`     | every test request: verdict, level, reason, ground truth; filters and pages in the URL                  | —                                                     |
+| Rules              | `rules.html`      | the signature rules and how often each matched                                                          | — (the ruleset itself is B-01)                        |
+| Statistical models | `models.html`     | the signals in the score; the learned model per endpoint and parameter                                  | E-02: character classes (T1), lengths and scores (T2) |
+| Detection quality  | `evaluation.html` | the calibrated operating point, confusion matrix, rates and variants with Wilson intervals, ROC and AUC | —                                                     |
+| Base rate          | `base-rate.html`  | Bayes and the base-rate fallacy, with a worked example                                                  | E-03 (T4)                                             |
+| About              | `about.html`      | the project, the method, the themes                                                                     | —                                                     |
 
 ## How it is built
 
@@ -29,20 +29,26 @@ dashboard/
 │   ├── styles.css    the whole look: tokens, layout, components, dark mode
 │   ├── shell.js      shared behaviour: settings from the URL, links, sidebar
 │   ├── state.js      settings ⇄ URL (pure, tested)
-│   ├── pipeline.js   dataset → train on legit traffic → detect → metrics (pure, tested)
+│   ├── pipeline.js   dataset → train on legit traffic → threshold from the calibration split →
+│   │                 detect → metrics (pure, tested)
+│   ├── quality.js    Wilson intervals, results by variant, ROC and AUC per mode (pure, tested)
 │   ├── levels.js     alert level 0–15 and severity (pure, tested)
 │   ├── dom.js        DOM helpers: data goes in as text, never as HTML
 │   ├── ui.js         KPI tile, level badge
-│   ├── charts.js     Chart.js setup and helpers
+│   ├── charts.js     Chart.js setup and helpers (bar, doughnut, ROC)
 │   ├── assets/       icon
 │   └── pages/        one script per page
-├── test/             node:test for state, levels, pipeline
+├── test/             node:test for state, shell, levels, pipeline, quality
 └── vite.config.js    page list, partials plugin, CSP
 ```
 
-- **Settings in the URL**: `?seed=42&mode=combined&threshold=1&prevalence=0.1&size=1000`. The same
-  URL always shows the same experiment, every internal link keeps the settings, and nothing is
-  kept in browser storage — so the demo also works inside a sandboxed iframe.
+- **Settings in the URL**: `?seed=42&mode=combined&fpr=0.01&threshold=1&prevalence=0.1&size=1000`.
+  The same URL always shows the same experiment, every internal link keeps the settings, and
+  nothing is kept in browser storage — so the demo also works inside a sandboxed iframe.
+- **The threshold is calibrated** (ADR-009, E-06): every page sets it on 2,000 legitimate
+  calibration requests so that at most `fpr` of them raise an alert (5%, 2%, 1% or 0.5%; lower
+  targets need more requests, n ≥ 10/α, and are in `npm run experiments`). `fpr=manual` uses the
+  `threshold` setting instead. 5% of the legitimate test requests are hard cases.
 - **Alert level** k means p ≤ 10^−k for a statistical alert; 15 means a signature matched. Severity:
   low 0–1, medium 2–3, high 4–14, critical 15. For display only: the threshold decides the verdict.
 - **Security**: a strict Content Security Policy is added to every page at build time (no inline
@@ -76,8 +82,8 @@ Every page has its own address: `/events.html`, `/models.html`, …
    ```
 
 2. In the page's script (`src/pages/<page>.js`), take the data from `runExperiment(state)` and draw
-   it: call `setupCharts()`, then `barChart(…)` or `new Chart(…)`. Register any Chart.js component
-   you need (e.g. `LineController`, `PointElement` for a curve) in `src/charts.js`.
+   it: call `setupCharts()`, then `barChart(…)`, `rocChart(…)` or `new Chart(…)`. Register any
+   other Chart.js component you need in `src/charts.js` (bars, doughnuts and lines are there).
 3. Keep the statistics in the pure packages (`core`, `evaluation`) with their tests: the page only
    draws.
 4. No inline styles or scripts (the CSP blocks them); data goes into the page as text only (`h()`

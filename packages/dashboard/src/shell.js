@@ -27,6 +27,17 @@ export function initShell() {
         field.value = String(value);
       }
     }
+    // The threshold field only counts with a manual threshold: otherwise the threshold is
+    // calibrated (E-06), so the field is read-only (still sent, so a manual value is kept).
+    const fpr = form.elements.namedItem('fpr');
+    const threshold = form.elements.namedItem('threshold');
+    if (fpr instanceof HTMLSelectElement && threshold instanceof HTMLInputElement) {
+      const sync = () => {
+        threshold.readOnly = fpr.value !== 'manual';
+      };
+      fpr.addEventListener('change', sync);
+      sync();
+    }
     // Apply from the button's click, not from the form's `submit` event: in a sandboxed iframe
     // without `allow-forms` the browser cancels the submission before `submit` is even fired,
     // while a click still fires and a page may always navigate itself. Enter in a field also
@@ -60,10 +71,13 @@ export function initShell() {
  * @param {import('./state.js').ExperimentState} state
  */
 export function describe(state) {
-  const p = `p ≤ ${pOf(state.threshold)}`;
+  const cut =
+    state.fpr === 'manual'
+      ? `when p ≤ ${pOf(state.threshold)}`
+      : `above the threshold for ${percent(state.fpr)} false positives`;
   const when = {
-    combined: `alert on a rule match or when ${p}`,
-    stats: `statistics only, alert when ${p}`,
+    combined: `alert on a rule match or ${cut}`,
+    stats: `statistics only, alert ${cut}`,
     rules: 'rules only, alert on a rule match',
   }[state.mode];
   const share = Number((state.prevalence * 100).toFixed(1));
@@ -71,6 +85,14 @@ export function describe(state) {
     `Simulated traffic · seed ${state.seed} · ${state.size.toLocaleString('en-US')} test ` +
     `requests, ${share}% attacks · ${when}`
   );
+}
+
+/**
+ * A rate as a short percentage: 0.01 → '1%', 0.005 → '0.5%'.
+ * @param {number} rate
+ */
+export function percent(rate) {
+  return `${Number((rate * 100).toFixed(2))}%`;
 }
 
 /**
