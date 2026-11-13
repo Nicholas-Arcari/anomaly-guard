@@ -237,7 +237,7 @@ Use it when single features overlap but the _combination_ is unusual. Drop const
 regularise (`S + λI`) before inverting: on legitimate traffic some features never vary, which
 makes `S` singular.
 
-## 6. Evaluation — `packages/evaluation` (metrics and threshold implemented; D-03, D-05 to do)
+## 6. Evaluation — `packages/evaluation` (metrics, threshold and ROC implemented; D-05 to do)
 
 From a labelled test set and scores, at a threshold `t` (predict "attack" when `score ≥ t`):
 
@@ -264,9 +264,18 @@ confusion matrix:            metrics:
     is very noisy. Use `n ≥ 10/α`: 1,000 calibration requests for 1%, 10,000 for 0.1%.
   - **On new data** the FPR is only close to `α`, not equal: it is a quantile estimated from a
     sample. That is why it gets a confidence interval (below).
-- **ROC / AUC (D-03):** sweep `t` over all scores, plot TPR vs. FPR; AUC is the area under it (and
-  the probability that a random attack scores above a random legit request). In `combined` mode a
-  rule hit scores `+Infinity`; in `rules` mode the score is binary, so its ROC is a single point.
+- **ROC / AUC (D-03, `rocCurve`).** Sweep `t` down through the distinct scores. Each step flags
+  one more group of tied scores and adds the point (FPR, TPR). The curve runs from (0, 0), where
+  nothing is flagged, to (1, 1).
+  - **AUC** is the trapezoid area under the points. It equals the **Mann–Whitney** statistic:
+    `AUC = P(score of a random attack > score of a random legitimate request)`, with ties
+    counting ½. A tied group that holds both classes is one diagonal step, which is exactly that
+    half credit.
+  - **In `combined` mode** a rule hit scores `+∞`, so it simply ranks first.
+  - **In `rules` mode** the score is binary (0 or 1). The curve has one inner point, the rules'
+    only operating point, and `AUC = (1 + TPR − FPR)/2`.
+  - **Reading it:** AUC = 0.5 is chance, 1 is perfect separation. Because it uses only the
+    ranking of the scores, AUC does not depend on the threshold.
 - **Confidence intervals (D-05).** Error rates are proportions estimated from finite samples, so
   report them with a 95% **Wilson score interval** (`z = 1.96`, `p̂ = x/n`):
 

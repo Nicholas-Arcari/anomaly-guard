@@ -149,19 +149,63 @@ export function positivePredictiveValue(tpr, fpr, prevalence) {
 }
 
 /**
- * ROC curve: sweep the threshold over the observed scores and return (fpr, tpr) points, with
- * the area under the curve. Threshold-independent summary the brief asks for (D-03).
+ * ROC curve and its area (D-03, methods.md §6): the threshold-free summary of a detector.
  *
- * Implementation notes: sort by score descending, step the threshold through the unique scores,
- * accumulate TP/FP, and integrate with the trapezoid rule for AUC. AUC also equals the
- * probability that a random attack scores above a random legit sample. Scores may be +Infinity
- * (a rule hit in combined mode, ADR-007) and may tie: treat tied scores as one step.
+ * The threshold sweeps down through the distinct scores. Each step flags one more group of tied
+ * scores and adds the point (FPR, TPR) for "attack when score ≥ that score". The curve starts at
+ * (0, 0), where nothing is flagged, and ends at (1, 1). A group that holds both attacks and
+ * legitimate requests is one diagonal step, so ties get half credit. +Infinity (a rule hit in
+ * `combined` mode, ADR-007) is simply the highest score.
  *
- * @param {Scored[]} scored
+ * AUC is the trapezoid area under the points. It equals the Mann–Whitney statistic: the
+ * probability that a random attack scores higher than a random legitimate request, ties counting
+ * ½. With a binary score (`rules` mode, 0 or 1) the curve has one inner point, and
+ * AUC = (1 + TPR − FPR) / 2.
+ *
+ * @param {Scored[]} scored  needs at least one attack and one legitimate sample
  * @returns {{ points: {fpr:number, tpr:number, threshold:number}[], auc:number }}
+ *   points[0] is the origin (threshold +Infinity: nothing flagged, unless scores are +Infinity)
  */
-// eslint-disable-next-line no-unused-vars
 export function rocCurve(scored) {
-  // TODO(D-03): implement the threshold sweep and trapezoidal AUC.
-  throw new Error('rocCurve not implemented yet (backlog D-03)');
+  const { positives, negatives } = countClasses(scored);
+  const sorted = [...scored].sort((a, b) => descending(a.score, b.score));
+  const points = [{ fpr: 0, tpr: 0, threshold: Infinity }];
+  let tp = 0;
+  let fp = 0;
+  for (let i = 0; i < sorted.length;) {
+    const threshold = sorted[i].score;
+    for (; i < sorted.length && sorted[i].score === threshold; i++) {
+      if (sorted[i].label === 'attack') tp++;
+      else fp++;
+    }
+    points.push({ fpr: fp / negatives, tpr: tp / positives, threshold });
+  }
+  let auc = 0;
+  for (let j = 1; j < points.length; j++) {
+    auc += ((points[j].fpr - points[j - 1].fpr) * (points[j].tpr + points[j - 1].tpr)) / 2;
+  }
+  return { points, auc };
+}
+
+/**
+ * Validate scored samples and count the two classes.
+ * @param {Scored[]} scored
+ * @returns {{ positives: number, negatives: number }}
+ */
+function countClasses(scored) {
+  if (!Array.isArray(scored)) throw new RangeError('expected an array of { label, score }');
+  let positives = 0;
+  let negatives = 0;
+  for (const s of scored) {
+    if (typeof s?.score !== 'number' || Number.isNaN(s.score)) {
+      throw new RangeError('every sample needs a numeric score (+Infinity allowed, NaN not)');
+    }
+    if (s.label === 'attack') positives++;
+    else if (s.label === 'legit') negatives++;
+    else throw new RangeError(`unknown label '${s.label}': expected 'attack' or 'legit'`);
+  }
+  if (positives === 0 || negatives === 0) {
+    throw new RangeError('needs at least one attack and one legitimate sample');
+  }
+  return { positives, negatives };
 }
