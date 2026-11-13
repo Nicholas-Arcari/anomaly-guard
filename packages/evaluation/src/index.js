@@ -209,3 +209,91 @@ function countClasses(scored) {
   }
   return { positives, negatives };
 }
+
+/** z for a two-sided 95% interval: the 97.5th percentile of the standard normal. */
+export const Z_95 = 1.959963984540054;
+
+/**
+ * Wilson score interval for a proportion x/n (D-05, methods.md §6). This is how TPR, FPR, FNR and
+ * precision get their uncertainty: they are proportions estimated from a finite test set.
+ * Unlike the textbook Wald interval p̂ ± z·√(p̂(1−p̂)/n), it never collapses to a single point at
+ * 0 or n and never leaves [0, 1]. So 0 false positives out of 900 gives FPR ∈ [0, 0.43%], not
+ * "exactly zero".
+ *
+ * @param {number} successes  x, an integer in [0, n]
+ * @param {number} n          number of trials, a positive integer
+ * @param {{ z?: number }} [options]  z = Z_95 (1.96) for 95%
+ * @returns {{ estimate: number, lower: number, upper: number, n: number }}
+ */
+export function wilsonInterval(successes, n, { z = Z_95 } = {}) {
+  if (!Number.isInteger(n) || n <= 0)
+    throw new RangeError('wilsonInterval: n must be a positive integer');
+  if (!Number.isInteger(successes) || successes < 0 || successes > n) {
+    throw new RangeError('wilsonInterval: successes must be an integer in [0, n]');
+  }
+  if (!(z > 0)) throw new RangeError('wilsonInterval: z must be positive');
+  const p = successes / n;
+  const z2 = z * z;
+  const denominator = 1 + z2 / n;
+  const centre = (p + z2 / (2 * n)) / denominator;
+  const half = (z / denominator) * Math.sqrt((p * (1 - p)) / n + z2 / (4 * n * n));
+  return {
+    estimate: p,
+    lower: successes === 0 ? 0 : Math.max(0, centre - half),
+    upper: successes === n ? 1 : Math.min(1, centre + half),
+    n,
+  };
+}
+
+/**
+ * Seeded, stratified percentile-bootstrap interval for the AUC (D-05, methods.md §6). It
+ * resamples the attacks and the legitimate samples separately, with replacement, so that every
+ * resample keeps the class counts of the test set. Each resample gets its AUC, and the interval is
+ * the (1−level)/2 and (1+level)/2 percentiles of those AUCs. Reproducible: the caller passes the
+ * random source, e.g. `createRng(seed).next` from `@anomaly-guard/traffic` (never Math.random).
+ *
+ * @param {Scored[]} scored
+ * @param {{ random: () => number, resamples?: number, level?: number }} options
+ *   random() returns a float in [0, 1); resamples defaults to 1000, level to 0.95
+ * @returns {{ estimate: number, lower: number, upper: number, resamples: number, level: number }}
+ */
+export function bootstrapAucInterval(scored, { random, resamples = 1000, level = 0.95 } = {}) {
+  if (typeof random !== 'function') {
+    throw new RangeError('bootstrapAucInterval: pass a seeded random() function');
+  }
+  if (!Number.isInteger(resamples) || resamples < 1) {
+    throw new RangeError('bootstrapAucInterval: resamples must be a positive integer');
+  }
+  if (!(level > 0 && level < 1))
+    throw new RangeError('bootstrapAucInterval: level must be in (0, 1)');
+  countClasses(scored);
+  const attacks = scored.filter((s) => s.label === 'attack');
+  const legit = scored.filter((s) => s.label === 'legit');
+  const draw = (pool) => Array.from(pool, () => pool[Math.floor(random() * pool.length)]);
+
+  const aucs = Array.from(
+    { length: resamples },
+    () => rocCurve([...draw(attacks), ...draw(legit)]).auc,
+  );
+  aucs.sort((a, b) => a - b);
+  return {
+    estimate: rocCurve(scored).auc,
+    lower: quantile(aucs, (1 - level) / 2),
+    upper: quantile(aucs, (1 + level) / 2),
+    resamples,
+    level,
+  };
+}
+
+/**
+ * Quantile of an ascending array by linear interpolation between order statistics (the usual
+ * "type 7" definition).
+ * @param {number[]} sorted  ascending, non-empty
+ * @param {number} q         in [0, 1]
+ */
+function quantile(sorted, q) {
+  const position = (sorted.length - 1) * q;
+  const below = Math.floor(position);
+  const above = Math.ceil(position);
+  return sorted[below] + (sorted[above] - sorted[below]) * (position - below);
+}
