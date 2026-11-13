@@ -237,7 +237,7 @@ Use it when single features overlap but the _combination_ is unusual. Drop const
 regularise (`S + λI`) before inverting: on legitimate traffic some features never vary, which
 makes `S` singular.
 
-## 6. Evaluation — `packages/evaluation` (metrics, threshold, ROC and intervals implemented)
+## 6. Evaluation — `packages/evaluation`, `packages/experiments` (implemented)
 
 From a labelled test set and scores, at a threshold `t` (predict "attack" when `score ≥ t`):
 
@@ -303,8 +303,39 @@ confusion matrix:            metrics:
     of one run. How much the results move from one dataset to another is a different question,
     answered by the repeated seeds below (D-04).
 
-- **Repeated seeds (ADR-009).** Run every configuration on at least 20 seeds and report the mean
-  and spread; record seeds, git commit, split sizes, prevalence and target FPR.
+- **Repeated seeds (ADR-009, D-04, `npm run experiments`).** Every mode runs on 20 seeds. Each
+  seed is a whole run: a fresh dataset, a model fitted on its training split, thresholds set on
+  its calibration split, one pass over its test split.
+  - **Within one run**, the Wilson and bootstrap intervals above give the uncertainty of the test
+    set.
+  - **Across runs**, report each metric's mean, SD and range, and a 95% interval for the mean
+    (`meanInterval`), with Student's t on `s − 1` degrees of freedom for `s` seeds:
+
+    ```
+    mean ± t(0.975, s − 1) · SD / √s        20 seeds: t(0.975, 19) = 2.093
+    ```
+
+    It covers everything that changes between runs: training data, model, threshold and test
+    set. The t quantile comes from the regularized incomplete beta function, by bisection
+    (`studentTQuantile`).
+
+  - **Why not a Wilson interval on the counts added up over all seeds:** the requests of one seed
+    share one model and one threshold, so they are not independent trials. Such an interval
+    would leave out how much the threshold moves from run to run, and come out too narrow. The
+    seed is the independent unit.
+  - **Zero width:** when a rate is the same in every seed (say 100% of canonical attacks), the SD
+    and the interval are 0. The report then says "every seed" and gives the count.
+  - **Which noise dominates:** compare one seed's bootstrap interval for the AUC (its standard
+    error is about the width / 3.92) with the SD across seeds. If they are close, the test set
+    is the main source of noise; if the SD is larger, the training data and the threshold move
+    the result too.
+  - **Random streams:** the bootstrap of seed `s` uses the seed `s + 2³¹` (mod 2³²). The
+    generator steps through one cycle of 2³² states, so that stream starts half a cycle away from
+    the dataset's, and the two never share numbers. Every mode reuses the same resamples, so the
+    bootstrap is paired.
+  - **Provenance:** `results/<date>-<commit>/results.json` records the seeds, the git commit
+    (and whether the tree had uncommitted changes), the split sizes, prevalence, hard-case share,
+    targets and resamples; `report.md` holds the tables.
 - Always show the confusion matrix and both error rates, never accuracy alone (standards §3), and
   break the results down by `variant` (canonical / obfuscated / novel attacks, typical / hard
   legitimate requests).

@@ -16,6 +16,8 @@ import {
   rocCurve, // ROC points and AUC = Mann–Whitney (D-03)
   wilsonInterval, // 95% interval for a rate x/n (D-05)
   bootstrapAucInterval, // seeded, stratified bootstrap interval for the AUC (D-05)
+  meanInterval, // 95% Student-t interval for the mean of per-seed values (D-04)
+  studentTQuantile, // quantile of Student's t, e.g. (0.975, 19) → 2.093
   Z_95, // 1.96
 } from '@anomaly-guard/evaluation';
 ```
@@ -44,9 +46,10 @@ scores `+Infinity`, which every function here must handle.
 
 Implemented: confusion matrix, precision/recall/F1/FPR/FNR, single-threshold evaluation, the
 base-rate PPV helper, and `thresholdAtFpr`, the threshold from the legit-only calibration split at
-a target FPR (D-06, ADR-009), `rocCurve` with its AUC (D-03), and the confidence intervals (D-05): Wilson for
-rates, a seeded stratified bootstrap for the AUC. The experiment runner that
-uses all of this lives in a separate Node-only workspace, `packages/experiments` (D-04).
+a target FPR (D-06, ADR-009), `rocCurve` with its AUC (D-03), and the confidence intervals (D-05):
+Wilson for rates, a seeded stratified bootstrap for the AUC, and `meanInterval` across seeds
+(D-04). The experiment runner that uses all of this lives in a separate Node-only workspace,
+[`packages/experiments`](../experiments) (D-04).
 
 ## Test
 

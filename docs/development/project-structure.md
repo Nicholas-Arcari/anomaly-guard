@@ -26,7 +26,7 @@ anomaly-guard/
     ├── evaluation/           # metrics, ROC/AUC, base-rate
     ├── server/               # Express live monitor (Node only)
     ├── dashboard/            # multi-page SIEM-style console (→ GitHub Pages, ADR-010)
-    └── experiments/          # (planned, D-04) Node-only runner: seeds → results/
+    └── experiments/          # Node-only multi-seed runner → results/ (D-04)
 ```
 
 **Rules:**
@@ -62,25 +62,27 @@ anomaly-guard/
   `evaluation` (it can run the whole pipeline client-side).
 - `evaluation` depends only on plain data (arrays of `{ label, score }`); keep it decoupled from
   `core` so it can score any detector.
-- `experiments` (planned, D-04 — ADR-009) is **Node-only**: it depends on `core`, `traffic` and
-  `evaluation`, runs the seeded experiments and may use `fs` to write `results/`. It is the only
-  place experiment code touches the file system, so the three pure packages stay pure.
+- `experiments` (D-04, ADR-009) is **Node-only**: it depends on `core`, `traffic` and
+  `evaluation`, runs the seeded experiments and may use `fs` to write `results/` (and runs `git`
+  to record the commit). It is the only place experiment code touches the file system, so the
+  three pure packages stay pure.
 - Purity is enforced by ESLint (`eslint.config.js`): in `core`, `traffic` and `evaluation` `src/`,
-  browser globals, Node globals and modules, `fetch` and `Math.random` are errors.
+  browser globals, Node globals and modules, `fetch` and `Math.random` are errors. In
+  `experiments/src` the network and `Math.random` are errors too.
 - A workspace **never** reaches into another workspace's `src/` internals — import from its
   package entry (`@anomaly-guard/<name>`).
 
 The work is owned by statistical theme (T1–T4, [backlog](../planning/backlog.md) §8), not by
 workspace: a theme spans several workspaces, and the **Themes** column says who works where.
 
-| Workspace     | Area             | Themes                                                  | Key exports (planned)                                                                                   |
-| ------------- | ---------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `core`        | detection engine | T1 (chi-square, rules), T2 (length, outliers, detector) | `extractFeatures`, `RuleEngine`, `trainStatModel`, `scoreRequest`, `paramKey`, `pToScore`, `detect`     |
-| `traffic`     | data             | T4                                                      | `createRng`, `makeLegitRequest`, `makeAttackRequest`, `buildDataset` (train / calibration / test)       |
-| `evaluation`  | evaluation       | T3 (T4 uses `positivePredictiveValue`)                  | `confusionMatrix`, `metrics`, `rocCurve`, `positivePredictiveValue`, `thresholdAtFpr`, `wilsonInterval` |
-| `server`      | live monitor     | T3 (B-02)                                               | Express app: `POST /ingest`, `GET /health`                                                              |
-| `dashboard`   | UI               | everyone: one chart per theme                           | seven HTML pages (ADR-010); GitHub Pages build; internals in its README                                 |
-| `experiments` | experiment runs  | T3                                                      | (planned, D-04) multi-seed runner writing `results/`                                                    |
+| Workspace     | Area             | Themes                                                  | Key exports (planned)                                                                                                                           |
+| ------------- | ---------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `core`        | detection engine | T1 (chi-square, rules), T2 (length, outliers, detector) | `extractFeatures`, `RuleEngine`, `trainStatModel`, `scoreRequest`, `paramKey`, `pToScore`, `detect`                                             |
+| `traffic`     | data             | T4                                                      | `createRng`, `makeLegitRequest`, `makeAttackRequest`, `buildDataset` (train / calibration / test)                                               |
+| `evaluation`  | evaluation       | T3 (T4 uses `positivePredictiveValue`)                  | `confusionMatrix`, `metrics`, `thresholdAtFpr`, `rocCurve`, `wilsonInterval`, `bootstrapAucInterval`, `meanInterval`, `positivePredictiveValue` |
+| `server`      | live monitor     | T3 (B-02)                                               | Express app: `POST /ingest`, `GET /health`                                                                                                      |
+| `dashboard`   | UI               | everyone: one chart per theme                           | seven HTML pages (ADR-010); GitHub Pages build; internals in its README                                                                         |
+| `experiments` | experiment runs  | T3                                                      | `runExperiment`, `formatReport`; `npm run experiments` writes `results/<date>-<commit>/`                                                        |
 
 ## 3. `packages/core` internals
 

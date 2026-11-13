@@ -297,3 +297,140 @@ function quantile(sorted, q) {
   const above = Math.ceil(position);
   return sorted[below] + (sorted[above] - sorted[below]) * (position - below);
 }
+
+/**
+ * Interval for the mean of per-seed values (D-04, methods.md §6): mean ± t·SD/√n, with Student's
+ * t on n − 1 degrees of freedom. The seed is the independent unit of an experiment (ADR-009): each
+ * seed has its own training data, model, threshold and test set. So this interval covers
+ * everything that changes from one run to the next. A Wilson interval on counts pooled over seeds
+ * would not: the requests of one seed share one threshold, so they are not independent trials,
+ * and the pooled interval comes out too narrow.
+ *
+ * When every value is the same (say 100% of canonical attacks in every seed) the SD is 0 and so is
+ * the width: report that as "in every seed", with the pooled count.
+ *
+ * @param {number[]} values  one finite value per seed, at least two
+ * @param {{ level?: number, range?: [number, number] }} [options]
+ *   level defaults to 0.95; `range` clips the interval to the parameter's range, e.g. [0, 1] for a
+ *   rate, where the normal approximation can otherwise cross 0 or 1
+ * @returns {{ estimate: number, lower: number, upper: number, n: number, sd: number,
+ *   min: number, max: number, level: number }}  estimate is the mean, sd the sample SD (n − 1)
+ */
+export function meanInterval(values, { level = 0.95, range } = {}) {
+  if (!Array.isArray(values) || values.length < 2) {
+    throw new RangeError('meanInterval: needs at least two values');
+  }
+  if (values.some((v) => !Number.isFinite(v))) {
+    throw new RangeError('meanInterval: values must be finite numbers');
+  }
+  if (!(level > 0 && level < 1)) throw new RangeError('meanInterval: level must be in (0, 1)');
+  const n = values.length;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  if (min === max) return { estimate: min, lower: min, upper: min, n, sd: 0, min, max, level };
+  const mean = values.reduce((sum, v) => sum + v, 0) / n;
+  const sd = Math.sqrt(values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / (n - 1));
+  const half = (studentTQuantile((1 + level) / 2, n - 1) * sd) / Math.sqrt(n);
+  const [low, high] = range ?? [-Infinity, Infinity];
+  return {
+    estimate: mean,
+    lower: Math.max(low, mean - half),
+    upper: Math.min(high, mean + half),
+    n,
+    sd,
+    min,
+    max,
+    level,
+  };
+}
+
+/**
+ * Quantile of Student's t distribution: the t with P(T ≤ t) = p for `df` degrees of freedom, e.g.
+ * studentTQuantile(0.975, 19) ≈ 2.093. Found by bisection on the distribution function, which is
+ * computed from the regularized incomplete beta function: P(T > t) = ½·I_{df/(df+t²)}(df/2, ½)
+ * for t ≥ 0.
+ *
+ * @param {number} p   probability in (0, 1)
+ * @param {number} df  degrees of freedom, a positive number (≤ 1e6)
+ * @returns {number}
+ */
+export function studentTQuantile(p, df) {
+  if (!(p > 0 && p < 1)) throw new RangeError('studentTQuantile: p must be in (0, 1)');
+  if (!(df > 0 && df <= 1e6)) throw new RangeError('studentTQuantile: df must be in (0, 1e6]');
+  if (p < 0.5) return -studentTQuantile(1 - p, df);
+  if (p === 0.5) return 0;
+  const tail = 1 - p; // find t with P(T > t) = tail; that probability falls as t grows
+  const upperTail = (t) => 0.5 * regularizedBeta(df / (df + t * t), df / 2, 0.5);
+  let lo = 0;
+  let hi = 1;
+  while (upperTail(hi) > tail) {
+    lo = hi;
+    hi *= 2;
+  }
+  for (let i = 0; i < 200 && hi - lo > 1e-13 * hi; i++) {
+    const mid = (lo + hi) / 2;
+    if (upperTail(mid) > tail) lo = mid;
+    else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+/**
+ * Regularized incomplete beta function I_x(a, b), from its continued fraction (Numerical Recipes
+ * §6.4). It gives the tails of Student's t here; the exact binomial test can use it too.
+ * @param {number} x  in [0, 1]
+ * @param {number} a  > 0
+ * @param {number} b  > 0
+ */
+function regularizedBeta(x, a, b) {
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+  const front = Math.exp(
+    logGamma(a + b) - logGamma(a) - logGamma(b) + a * Math.log(x) + b * Math.log1p(-x),
+  );
+  // The fraction converges quickly for x < (a + 1)/(a + b + 2); use the symmetry otherwise.
+  if (x < (a + 1) / (a + b + 2)) return (front * betaFraction(x, a, b)) / a;
+  return 1 - (front * betaFraction(1 - x, b, a)) / b;
+}
+
+/** Continued fraction for I_x(a, b), evaluated with the modified Lentz method. */
+function betaFraction(x, a, b) {
+  const TINY = 1e-300;
+  const guard = (v) => (Math.abs(v) < TINY ? TINY : v);
+  let c = 1;
+  let d = 1 / guard(1 - ((a + b) * x) / (a + 1));
+  let h = d;
+  for (let m = 1; m <= 1000; m++) {
+    const m2 = 2 * m;
+    const even = (m * (b - m) * x) / ((a + m2 - 1) * (a + m2));
+    d = 1 / guard(1 + even * d);
+    c = guard(1 + even / c);
+    h *= d * c;
+    const odd = (-(a + m) * (a + b + m) * x) / ((a + m2) * (a + m2 + 1));
+    d = 1 / guard(1 + odd * d);
+    c = guard(1 + odd / c);
+    const step = d * c;
+    h *= step;
+    if (Math.abs(step - 1) < 1e-15) return h;
+  }
+  throw new Error('regularizedBeta: the continued fraction did not converge');
+}
+
+/**
+ * ln Γ(x) for x ≥ 0.5, by the Lanczos approximation (g = 7, nine coefficients): about 15 correct
+ * digits.
+ * @param {number} x
+ */
+function logGamma(x) {
+  const g = 7;
+  const coefficients = [
+    0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
+    -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6,
+    1.5056327351493116e-7,
+  ];
+  const z = x - 1;
+  let sum = coefficients[0];
+  for (let i = 1; i < coefficients.length; i++) sum += coefficients[i] / (z + i);
+  const t = z + g + 0.5;
+  return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(sum);
+}
