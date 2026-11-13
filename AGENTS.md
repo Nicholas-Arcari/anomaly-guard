@@ -65,8 +65,8 @@ Full list with rationale: [`docs/development/tech-stack.md`](docs/development/te
 
 Workspaces in `packages/`: `core` (features, rules, statistical models, detector — imported by
 everything, so it must never couple to a runtime), `traffic` (seeded generator, labelled dataset),
-`evaluation` (metrics, ROC/AUC, base rate), `server` (Express live monitor), `dashboard` (browser
-UI, GitHub Pages build). Tree + dependency rules:
+`evaluation` (metrics, ROC/AUC, base rate), `server` (Express live monitor), `experiments`
+(Node-only multi-seed runner → `results/`), `dashboard` (browser UI, GitHub Pages build). Tree + dependency rules:
 [`docs/development/project-structure.md`](docs/development/project-structure.md).
 
 **Work is owned by statistical theme, not by package** — the exam is on statistics. Each member
@@ -203,6 +203,7 @@ Shared engine:        packages/core/src/{features,rules,stats,detector}
 Traffic + dataset:    packages/traffic/src
 Evaluation harness:   packages/evaluation/src
 Express monitor:      packages/server/src
+Experiments (Node):   packages/experiments/src   (npm run experiments)
 Dashboard (Pages):    packages/dashboard/src
 ```
 

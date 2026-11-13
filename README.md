@@ -19,13 +19,14 @@ boundaries in [`AGENTS.md`](AGENTS.md) §2.
 
 ## What's inside
 
-| Workspace                                    | What it does                                                                                                   |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| [`packages/core`](packages/core)             | Feature extraction, rule engine, statistical models, detector (pure JS, runs in browser and Node)              |
-| [`packages/traffic`](packages/traffic)       | Seeded generator of legitimate + malicious requests, labelled dataset                                          |
-| [`packages/evaluation`](packages/evaluation) | Confusion matrix, precision/recall/F1, FPR/FNR, ROC/AUC, base-rate                                             |
-| [`packages/server`](packages/server)         | Express live monitor that ingests simulated requests                                                           |
-| [`packages/dashboard`](packages/dashboard)   | Multi-page, SIEM-style console (Vite) — events, rules, models, detection quality; static build on GitHub Pages |
+| Workspace                                      | What it does                                                                                                   |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| [`packages/core`](packages/core)               | Feature extraction, rule engine, statistical models, detector (pure JS, runs in browser and Node)              |
+| [`packages/traffic`](packages/traffic)         | Seeded generator of legitimate + malicious requests, labelled dataset                                          |
+| [`packages/evaluation`](packages/evaluation)   | Confusion matrix, precision/recall/F1, FPR/FNR, ROC/AUC, base-rate                                             |
+| [`packages/server`](packages/server)           | Express live monitor that ingests simulated requests                                                           |
+| [`packages/experiments`](packages/experiments) | Multi-seed experiment runner (Node only): thresholds at a target FPR, intervals, results with provenance       |
+| [`packages/dashboard`](packages/dashboard)     | Multi-page, SIEM-style console (Vite) — events, rules, models, detection quality; static build on GitHub Pages |
 
 ## Quick start
 
@@ -36,6 +37,7 @@ npm test             # run the test suite (node:test)
 npm run dev          # start the dashboard (Vite dev server)
 npm run dev:server   # start the Express monitor (separate terminal)
 npm run build        # static build of the dashboard (for GitHub Pages)
+npm run experiments  # the 20-seed experiment → results/ (about 1.5 minutes)
 ```
 
 Requires **Node.js ≥ 22**.
@@ -52,11 +54,12 @@ Requires **Node.js ≥ 22**.
 
 ## Status
 
-Early scaffold. The toolchain runs; the evaluation and entropy primitives, the dataset contract
-(train / calibration / test, attacks injected into legitimate requests, variants) and a baseline
-detector are implemented and tested. The pedagogically central pieces (chi-square score, length
-and outlier models, threshold calibration, ROC sweep, confidence intervals, realistic traffic) are
-specified tasks in the backlog — that is the group's work. Methodology decisions: ADR-006 – ADR-009.
+Work in progress. Implemented and tested: the dataset contract (train / calibration / test,
+attacks injected into legitimate requests, variants), the generated traffic and attack families
+(T4), a baseline detector, and the evaluation (T3): thresholds calibrated at a target FPR, ROC/AUC,
+confidence intervals and the 20-seed experiment (`npm run experiments`). Still open: the
+chi-square score (T1) and the length and outlier models (T2), as specified in the backlog.
+Methodology decisions: ADR-006 – ADR-009.
 
 ## Reference
 

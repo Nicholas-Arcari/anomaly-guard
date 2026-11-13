@@ -19,13 +19,14 @@ I confini di perimetro sono in [`AGENTS.md`](AGENTS.md) §2.
 
 ## Cosa contiene
 
-| Workspace                                    | Cosa fa                                                                                                                     |
-| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| [`packages/core`](packages/core)             | Estrazione feature, motore a regole, modelli statistici, detector (JS puro, gira nel browser e in Node)                     |
-| [`packages/traffic`](packages/traffic)       | Generatore con seed di richieste legittime + malevole, dataset etichettato                                                  |
-| [`packages/evaluation`](packages/evaluation) | Matrice di confusione, precision/recall/F1, FPR/FNR, ROC/AUC, base-rate                                                     |
-| [`packages/server`](packages/server)         | Monitor Express che riceve le richieste simulate                                                                            |
-| [`packages/dashboard`](packages/dashboard)   | Console multi-pagina in stile SIEM (Vite) — eventi, regole, modelli, qualità del rilevamento; build statica su GitHub Pages |
+| Workspace                                      | Cosa fa                                                                                                                     |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| [`packages/core`](packages/core)               | Estrazione feature, motore a regole, modelli statistici, detector (JS puro, gira nel browser e in Node)                     |
+| [`packages/traffic`](packages/traffic)         | Generatore con seed di richieste legittime + malevole, dataset etichettato                                                  |
+| [`packages/evaluation`](packages/evaluation)   | Matrice di confusione, precision/recall/F1, FPR/FNR, ROC/AUC, base-rate                                                     |
+| [`packages/server`](packages/server)           | Monitor Express che riceve le richieste simulate                                                                            |
+| [`packages/experiments`](packages/experiments) | Esperimento su più seed (solo Node): soglie a un FPR obiettivo, intervalli, risultati con provenienza                       |
+| [`packages/dashboard`](packages/dashboard)     | Console multi-pagina in stile SIEM (Vite) — eventi, regole, modelli, qualità del rilevamento; build statica su GitHub Pages |
 
 ## Avvio rapido
 
@@ -36,6 +37,7 @@ npm test             # esegue i test (node:test)
 npm run dev          # avvia la dashboard (dev server Vite)
 npm run dev:server   # avvia il monitor Express (altro terminale)
 npm run build        # build statica della dashboard (per GitHub Pages)
+npm run experiments  # l'esperimento su 20 seed → results/ (circa 1,5 minuti)
 ```
 
 Richiede **Node.js ≥ 22**.

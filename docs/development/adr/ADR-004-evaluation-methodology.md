@@ -54,4 +54,4 @@ fitting on the test set, or reporting accuracy on an imbalanced set.
 
 - [x] `confusionMatrix`, `metrics`, `positivePredictiveValue` implemented in `evaluation`.
 - [ ] `rocCurve` + `auc` (threshold sweep) — backlog D-03.
-- [ ] Experiment scripts that fix a seed and write `results/` — backlog D-04, see ADR-009.
+- [x] Experiment scripts that fix a seed and write `results/` — backlog D-04, see ADR-009.

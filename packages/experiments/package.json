@@ -1,0 +1,20 @@
+{
+  "name": "@anomaly-guard/experiments",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Multi-seed experiment runner (Node only): calibrates thresholds on legitimate traffic, scores every detection mode on held-out test sets, and writes results/ with seeds and commit (ADR-009).",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "@anomaly-guard/core": "*",
+    "@anomaly-guard/evaluation": "*",
+    "@anomaly-guard/traffic": "*"
+  },
+  "scripts": {
+    "start": "node src/cli.js",
+    "test": "node --test test/*.test.js"
+  }
+}

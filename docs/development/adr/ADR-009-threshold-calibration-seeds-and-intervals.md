@@ -58,5 +58,6 @@ zero".
 ### Actions
 
 - [x] `buildDataset` returns a `calibration` split.
-- [ ] D-06 `thresholdAtFpr`; D-05 intervals; D-04 runner in `packages/experiments`; E-06
-      target-FPR control in the dashboard; B-02 server threshold from calibration.
+- [x] D-06 `thresholdAtFpr`; D-05 intervals; D-04 runner in `packages/experiments`; B-02 server
+      threshold from calibration.
+- [ ] E-06 target-FPR control in the dashboard.
