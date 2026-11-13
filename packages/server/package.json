@@ -7,10 +7,12 @@
   "main": "src/server.js",
   "dependencies": {
     "@anomaly-guard/core": "*",
+    "@anomaly-guard/evaluation": "*",
     "@anomaly-guard/traffic": "*",
     "express": "^4.21.0"
   },
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.js"
   }
 }
