@@ -140,7 +140,7 @@ contribution for the individual grade.
   vs confidence interval; robust estimators (median, IQR, MAD); covariance and the Mahalanobis
   distance; combining several signals into one score.
 
-**T3 — Evaluation and uncertainty** · member: _…_
+**T3 — Evaluation and uncertainty** · member: Nicholas Arcari (`Nicholas-Arcari`)
 
 - _Question:_ how often is the detector wrong, and how sure are we of those numbers?
 - _Tasks:_ D-06, D-03, D-05, D-04, B-02, E-06, and D-07 if the group agrees; charts: ROC (E-02),
@@ -149,7 +149,7 @@ contribution for the individual grade.
   FPR); ROC/AUC and its link to the Mann–Whitney statistic; the Wilson interval for proportions;
   the bootstrap; variability across seeds; McNemar's test (D-07).
 
-**T4 — Probability and simulation** · member: _…_
+**T4 — Probability and simulation** · member: Giuseppe (`giuseppe1-1`)
 
 - _Question:_ what does normal traffic look like, and what happens when attacks are rare?
 - _Tasks:_ A-02, A-03, A-04, A-05, E-03; chart: the base-rate explainer (E-03).
