@@ -102,7 +102,7 @@
 | D-03 | ROC curve + AUC (threshold sweep; handles ties and `+Infinity` scores)                                                                                                                                               | T3    | D-01             | Ready            |
 | D-04 | Experiment runner in a new Node-only workspace `packages/experiments`: ≥ 20 seeds; rules / stats / combined; per-variant breakdown; at target FPR 1% and 0.1%, plus ROC/AUC; writes `results/` with seeds and commit | T3    | D-03, D-05, D-06 | Ready (baseline) |
 | D-05 | Confidence intervals: `wilsonInterval` for rates; seeded bootstrap for AUC (methods §6)                                                                                                                              | T3    | D-01             | Ready            |
-| D-06 | `thresholdAtFpr(legitScores, targetFpr)` on the calibration split (ADR-009); tests with ties                                                                                                                         | T3    | D-01             | Ready            |
+| D-06 | `thresholdAtFpr(legitScores, targetFpr)` on the calibration split (ADR-009); tests with ties                                                                                                                         | T3    | D-01             | Done             |
 | D-07 | Paired comparison of two modes on the same test requests (e.g. stats vs combined): McNemar's test on the requests where only one of the two is right                                                                 | T3    | D-04             | Proposed         |
 
 ## 7. E — Dashboard & report (`packages/dashboard`, `docs/`)
