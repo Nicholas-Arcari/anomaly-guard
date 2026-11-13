@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="The statistical model of normal traffic in The Anomaly Guard, learned per endpoint and parameter from legitimate requests only."
+    />
+    <title>Statistical models · The Anomaly Guard</title>
+    <link rel="icon" type="image/svg+xml" href="./assets/shield-B_ZBkaUY.svg" />
+    <script type="module" crossorigin src="./assets/models-DZBoxT2b.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/shell-D408pX4g.js">
+    <link rel="modulepreload" crossorigin href="./assets/ui-CKE3ubKe.js">
+    <link rel="stylesheet" crossorigin href="./assets/shell-nvHSoisF.css">
+  </head>
+  <body data-page="models">
+    <a class="skip-link" href="#main">Skip to content</a>
+<header class="topbar">
+  <button
+    class="nav-toggle"
+    type="button"
+    aria-label="Show the navigation"
+    aria-controls="sidebar"
+    aria-expanded="false"
+    data-nav-toggle
+  >
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" /></svg>
+  </button>
+  <a class="brand" href="./index.html" data-keep-state>
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+      <path
+        class="brand-shield"
+        d="M16 2 4 6.5v8.7c0 7.3 5.1 13.1 12 14.8 6.9-1.7 12-7.5 12-14.8V6.5L16 2z"
+      />
+      <path class="brand-pulse" d="M8.5 16.5h4l2-4.5 3 9 2.2-4.5h3.8" />
+    </svg>
+    <span>The Anomaly Guard</span>
+  </a>
+  <span class="topbar-tag">IDS lab · simulated traffic</span>
+  <span class="topbar-spacer"></span>
+  <a
+    class="topbar-link"
+    href="https://github.com/the-anomaly-guard/anomaly-guard"
+    target="_blank"
+    rel="noopener noreferrer"
+    >Source code ↗</a
+  >
+</header>
+
+    <div class="layout">
+      <nav id="sidebar" class="sidebar" aria-label="Sections">
+  <a class="nav-item" href="./index.html" data-nav="overview">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <rect x="2" y="2" width="5" height="5" rx="1" />
+      <rect x="9" y="2" width="5" height="5" rx="1" />
+      <rect x="2" y="9" width="5" height="5" rx="1" />
+      <rect x="9" y="9" width="5" height="5" rx="1" />
+    </svg>
+    Overview
+  </a>
+
+  <p class="nav-heading">Threat detection</p>
+  <a class="nav-item" href="./events.html" data-nav="events">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M2 8h12M2 12.5h8" /></svg>
+    Security events
+  </a>
+  <a class="nav-item" href="./rules.html" data-nav="rules">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M8 1.8 2.8 3.8v3.9c0 3.2 2.2 5.7 5.2 6.5 3-.8 5.2-3.3 5.2-6.5V3.8z" />
+      <path d="m5.8 8 1.6 1.6 2.9-3.1" />
+    </svg>
+    Rules
+  </a>
+
+  <p class="nav-heading">Anomaly detection</p>
+  <a class="nav-item" href="./models.html" data-nav="models">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M1.5 13.5h13" />
+      <path d="M2.5 12.5c2-.2 2.6-8.5 5.5-8.5s3.5 8.3 5.5 8.5" />
+    </svg>
+    Statistical models
+  </a>
+
+  <p class="nav-heading">Evaluation</p>
+  <a class="nav-item" href="./evaluation.html" data-nav="evaluation">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="6" />
+      <circle cx="8" cy="8" r="3" />
+      <circle cx="8" cy="8" r="0.6" />
+    </svg>
+    Detection quality
+  </a>
+  <a class="nav-item" href="./base-rate.html" data-nav="base-rate">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M3 13 13 3" />
+      <circle cx="4.5" cy="4.5" r="1.8" />
+      <circle cx="11.5" cy="11.5" r="1.8" />
+    </svg>
+    Base rate
+  </a>
+
+  <p class="nav-heading">Project</p>
+  <a class="nav-item" href="./about.html" data-nav="about">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="6.2" />
+      <path d="M8 7.2v4M8 4.8v.01" />
+    </svg>
+    About
+  </a>
+  <a
+    class="nav-item"
+    href="https://github.com/the-anomaly-guard/anomaly-guard"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M6.5 3.5h-3v9h9v-3M9 2.5h4.5V7M13.5 2.5l-6 6" />
+    </svg>
+    Source code ↗
+  </a>
+
+  <p class="nav-note">
+    All traffic is simulated in your browser. No payload is ever executed or sent anywhere.
+  </p>
+</nav>
+
+      <main id="main" class="content">
+        <form class="querybar" method="get" data-experiment-form aria-label="Experiment settings">
+  <label>
+    Seed
+    <input
+      name="seed"
+      type="number"
+      inputmode="numeric"
+      min="0"
+      max="4294967295"
+      step="1"
+      value="42"
+      required
+    />
+  </label>
+  <label>
+    Detector
+    <select name="mode">
+      <option value="combined">Rules + statistics</option>
+      <option value="stats">Statistics only</option>
+      <option value="rules">Rules only</option>
+    </select>
+  </label>
+  <label
+    title="Alert when the anomaly score s = −log10(p) reaches this value: 1 ≈ p ≤ 0.1, 2 ≈ p ≤ 0.01, 3 ≈ p ≤ 0.001"
+  >
+    Threshold (−log₁₀ p)
+    <input name="threshold" type="number" min="0" max="50" step="0.1" value="1" required />
+  </label>
+  <label>
+    Attack share
+    <input name="prevalence" type="number" min="0" max="1" step="0.01" value="0.1" required />
+  </label>
+  <label>
+    Requests
+    <input name="size" type="number" min="100" max="5000" step="100" value="1000" required />
+  </label>
+  <button type="submit">Apply</button>
+</form>
+
+        <div class="page-head">
+          <p class="crumbs">Anomaly detection</p>
+          <h1>Statistical models</h1>
+          <p class="page-sub" data-experiment></p>
+        </div>
+
+        <div class="callout">
+          The model learns what normal input looks like for each endpoint and parameter, from the
+          legitimate training split only — attacks never enter training (ADR-004). Each signal turns
+          how unusual a value is into a probability p and a score s = −log₁₀ p (ADR-007); the
+          request's score is the highest of them.
+        </div>
+
+        <section class="kpis" id="kpis" aria-label="Key figures"></section>
+
+        <section class="panel" aria-labelledby="signals-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="signals-title">Signals</h2>
+            <span class="panel-meta">task · theme</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data">
+              <thead>
+                <tr>
+                  <th scope="col">Signal</th>
+                  <th scope="col">Method</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Task</th>
+                </tr>
+              </thead>
+              <tbody id="signals-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="grid grid-2">
+          <div class="placeholder">
+            <span class="task">E-02 · T1</span>
+            <strong>Character classes: legitimate vs attack values</strong>
+            <span
+              >The share of each of the seven character classes in legitimate and in attack values —
+              the picture behind the chi-square score (C-03).</span
+            >
+          </div>
+          <div class="placeholder">
+            <span class="task">E-02 · T2</span>
+            <strong>Lengths and scores: legitimate vs attack</strong>
+            <span
+              >How value lengths and anomaly scores are distributed for legitimate and attack
+              requests, and where the threshold cuts them.</span
+            >
+          </div>
+        </div>
+
+        <section class="panel" aria-labelledby="pairs-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="pairs-title">Learned model per endpoint and parameter</h2>
+            <span class="panel-meta">length statistics and character-class shares</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data">
+              <thead>
+                <tr id="classes-head"></tr>
+              </thead>
+              <tbody id="pairs-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <footer class="site-footer">
+  <p>
+    The Anomaly Guard — an educational intrusion detection system (master's course project). Traffic
+    is generated in your browser from a seed; the attack strings are public textbook examples, shown
+    as text and never executed.
+    <a
+      href="https://github.com/the-anomaly-guard/anomaly-guard"
+      target="_blank"
+      rel="noopener noreferrer"
+      >Source code</a
+    >
+    · MIT licence.
+  </p>
+</footer>
+
+      </main>
+    </div>
+  </body>
+</html>
