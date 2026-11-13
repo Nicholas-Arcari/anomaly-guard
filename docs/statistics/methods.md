@@ -237,7 +237,7 @@ Use it when single features overlap but the _combination_ is unusual. Drop const
 regularise (`S + λI`) before inverting: on legitimate traffic some features never vary, which
 makes `S` singular.
 
-## 6. Evaluation — `packages/evaluation` (metrics implemented; D-03, D-05, D-06 stubs)
+## 6. Evaluation — `packages/evaluation` (metrics and threshold implemented; D-03, D-05 to do)
 
 From a labelled test set and scores, at a threshold `t` (predict "attack" when `score ≥ t`):
 
@@ -249,10 +249,21 @@ confusion matrix:            metrics:
                                      F1 = 2·P·R / (P + R)
 ```
 
-- **Choosing `t` (ADR-009, D-06).** Never by looking at test results. Score the legitimate-only
-  **calibration** split and take the smallest `t` that at most a fraction `targetFpr` of those
-  scores reach (e.g. 1%: with 1000 calibration requests, about the 10th highest score). Then
-  score the test set once with that `t`.
+- **Choosing `t` (ADR-009, D-06, `thresholdAtFpr`).** Never by looking at test results. Score
+  the legitimate-only **calibration** split: with `n` scores and target `α`, at most
+  `k = ⌊α·n⌋` of them may reach `t`. So `t` is the smallest number strictly above the
+  `(k+1)`-th largest calibration score, an empirical quantile of the legitimate scores. For
+  example, with `α = 1%` and 1,000 calibration requests, `t` sits just above the 11th highest
+  score and flags the top 10. Then score the test set once with that `t`.
+  - **Ties** move together: if including a tied group would exceed `k`, the whole group stays
+    below `t`, so the calibration FPR can be lower than `α`.
+  - **Rule hits** on legitimate requests score `+∞` in `combined` mode and are flagged at any
+    `t`. If there are more than `k` of them the target is **unattainable**, and the function
+    says so.
+  - **Size:** the estimate rests on the `k` largest scores; with fewer than about 10 of them it
+    is very noisy. Use `n ≥ 10/α`: 1,000 calibration requests for 1%, 10,000 for 0.1%.
+  - **On new data** the FPR is only close to `α`, not equal: it is a quantile estimated from a
+    sample. That is why it gets a confidence interval (below).
 - **ROC / AUC (D-03):** sweep `t` over all scores, plot TPR vs. FPR; AUC is the area under it (and
   the probability that a random attack scores above a random legit request). In `combined` mode a
   rule hit scores `+Infinity`; in `rules` mode the score is binary, so its ROC is a single point.

@@ -67,6 +67,72 @@ export function evaluateAt(scored, threshold) {
 }
 
 /**
+ * The decision threshold for a target false-positive rate, chosen on LEGITIMATE calibration
+ * scores only (ADR-009, methods.md §6). With n scores and target α, at most k = ⌊α·n⌋ of them may
+ * reach the threshold. The threshold is the smallest number strictly above the (k+1)-th largest
+ * score, so "attack when score ≥ threshold" flags at most k calibration requests. Tied scores move
+ * together: a tie that would exceed k stays below the threshold, so the calibration FPR can fall
+ * below α.
+ *
+ * In `combined` mode a legitimate request that matches a rule scores +Infinity (ADR-007) and is
+ * flagged at any threshold. If there are more than k of them, the target cannot be met: the
+ * threshold then sits just above the largest finite score (so the statistics flag none of the
+ * calibration requests) and `attainable` is false.
+ *
+ * The estimate rests on the k largest scores, and with fewer than about 10 of them it is very
+ * noisy. So use n ≥ 10/α: 1,000 calibration requests for 1%, 10,000 for 0.1%.
+ *
+ * @param {number[]} legitScores  scores of the legitimate calibration requests (never the test set)
+ * @param {number} targetFpr      α in [0, 1]
+ * @returns {{ threshold: number, calibrationFpr: number, attainable: boolean, n: number }}
+ *   `threshold` is always finite (core `detect` requires it); `calibrationFpr` is the share of
+ *   calibration scores ≥ threshold.
+ */
+export function thresholdAtFpr(legitScores, targetFpr) {
+  if (!Array.isArray(legitScores) || legitScores.length === 0) {
+    throw new RangeError('thresholdAtFpr: needs at least one calibration score');
+  }
+  if (!(targetFpr >= 0 && targetFpr <= 1)) {
+    throw new RangeError('thresholdAtFpr: targetFpr must be a number in [0, 1]');
+  }
+  if (legitScores.some((s) => typeof s !== 'number' || Number.isNaN(s))) {
+    throw new RangeError('thresholdAtFpr: scores must be numbers (+Infinity allowed, NaN not)');
+  }
+  const n = legitScores.length;
+  // ⌊α·n⌋ with a small tolerance, so that 0.29 · 100 = 28.999999999999996 still allows 29.
+  const k = Math.floor(targetFpr * n + 1e-9);
+  const sorted = [...legitScores].sort(descending);
+
+  let threshold = k >= n ? sorted[n - 1] : nextUp(sorted[k]);
+  if (!Number.isFinite(threshold)) {
+    const largestFinite = sorted.find(Number.isFinite);
+    threshold = largestFinite === undefined ? Number.MAX_VALUE : nextUp(largestFinite);
+  }
+  const flagged = sorted.filter((s) => s >= threshold).length;
+  return { threshold, calibrationFpr: flagged / n, attainable: flagged <= k, n };
+}
+
+/** Sort comparator: descending, with equal infinities kept equal (∞ − ∞ is NaN). */
+function descending(a, b) {
+  return a === b ? 0 : b - a;
+}
+
+/**
+ * The smallest double strictly greater than x (x itself for +Infinity and NaN).
+ * @param {number} x
+ * @returns {number}
+ */
+function nextUp(x) {
+  if (Number.isNaN(x) || x === Infinity) return x;
+  if (x === 0) return Number.MIN_VALUE; // also for -0
+  const view = new DataView(new ArrayBuffer(8));
+  view.setFloat64(0, x);
+  const bits = view.getBigUint64(0);
+  view.setBigUint64(0, x > 0 ? bits + 1n : bits - 1n);
+  return view.getFloat64(0);
+}
+
+/**
  * Positive predictive value P(attack | alarm) by Bayes, for a given operating point and base
  * rate — the base-rate fallacy (methods.md §7). Rare attacks ⇒ mostly false alarms even when
  * TPR is high and FPR is low.

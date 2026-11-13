@@ -12,6 +12,7 @@ import {
   metrics,
   evaluateAt,
   positivePredictiveValue, // base-rate / Bayes
+  thresholdAtFpr, // threshold from legitimate calibration scores at a target FPR (D-06)
   rocCurve, // stub: D-03
 } from '@anomaly-guard/evaluation';
 ```
@@ -24,6 +25,10 @@ const r = evaluateAt(scoredSamples, 3); // predict "attack" when score ≥ 3
 
 // Base-rate fallacy: a "good" detector still mostly false-alarms when attacks are rare.
 positivePredictiveValue(0.99, 0.01, 0.001); // ≈ 0.09
+
+// The honest operating point (ADR-009): a threshold chosen on LEGITIMATE calibration scores only.
+const { threshold, calibrationFpr, attainable } = thresholdAtFpr(calibrationScores, 0.01);
+evaluateAt(testScored, threshold); // then score the test set once
 ```
 
 **Always report** the confusion matrix and both FPR and FNR — never accuracy alone, because the
@@ -34,10 +39,10 @@ scores `+Infinity`, which every function here must handle.
 
 ## Status
 
-Implemented: confusion matrix, precision/recall/F1/FPR/FNR, single-threshold evaluation, and the
-base-rate PPV helper. Stub: `rocCurve` + AUC (D-03). Planned: `thresholdAtFpr` — the threshold
-from the legit-only calibration split at a target FPR (D-06, ADR-009) — and confidence intervals
-on the metrics (D-05: Wilson for rates, seeded bootstrap for AUC). The experiment runner that
+Implemented: confusion matrix, precision/recall/F1/FPR/FNR, single-threshold evaluation, the
+base-rate PPV helper, and `thresholdAtFpr`, the threshold from the legit-only calibration split at
+a target FPR (D-06, ADR-009). Stub: `rocCurve` + AUC (D-03). Planned: confidence intervals on the
+metrics (D-05: Wilson for rates, seeded bootstrap for AUC). The experiment runner that
 uses all of this lives in a separate Node-only workspace, `packages/experiments` (D-04).
 
 ## Test
