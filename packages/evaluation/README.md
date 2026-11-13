@@ -13,7 +13,7 @@ import {
   evaluateAt,
   positivePredictiveValue, // base-rate / Bayes
   thresholdAtFpr, // threshold from legitimate calibration scores at a target FPR (D-06)
-  rocCurve, // stub: D-03
+  rocCurve, // ROC points and AUC = Mann–Whitney (D-03)
 } from '@anomaly-guard/evaluation';
 ```
 
@@ -41,8 +41,8 @@ scores `+Infinity`, which every function here must handle.
 
 Implemented: confusion matrix, precision/recall/F1/FPR/FNR, single-threshold evaluation, the
 base-rate PPV helper, and `thresholdAtFpr`, the threshold from the legit-only calibration split at
-a target FPR (D-06, ADR-009). Stub: `rocCurve` + AUC (D-03). Planned: confidence intervals on the
-metrics (D-05: Wilson for rates, seeded bootstrap for AUC). The experiment runner that
+a target FPR (D-06, ADR-009), and `rocCurve` with its AUC (D-03). Planned: confidence intervals on
+the metrics (D-05: Wilson for rates, seeded bootstrap for AUC). The experiment runner that
 uses all of this lives in a separate Node-only workspace, `packages/experiments` (D-04).
 
 ## Test
