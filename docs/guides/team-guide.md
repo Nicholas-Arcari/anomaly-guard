@@ -124,7 +124,8 @@ Any page, with any settings, is a plain address:
 | `https://the-anomaly-guard.github.io/anomaly-guard/about.html`      | About the project  |
 
 Add settings to open a specific experiment, for example
-`…/events.html?seed=7&mode=stats&threshold=2&prevalence=0.1&size=1000&show=mistakes`.
+`…/events.html?seed=7&mode=stats&fpr=0.01&prevalence=0.1&size=1000&show=mistakes`: the threshold
+is calibrated for 1% false positives (`fpr=manual&threshold=2` sets it by hand instead).
 
 ### 2.2 Option A — a link (works everywhere)
 

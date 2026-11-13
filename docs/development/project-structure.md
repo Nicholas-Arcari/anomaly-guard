@@ -19,7 +19,8 @@ anomaly-guard/
 │   ├── project-brief.md      # The assignment (scope)
 │   ├── development/          # standards, project-structure, tech-stack, adr/
 │   ├── statistics/           # methods.md — the maths
-│   └── planning/             # backlog.md — task board
+│   ├── planning/             # backlog.md — task board
+│   └── report/               # the report, one chapter per theme (E-05)
 └── packages/
     ├── core/                 # shared engine (pure JS)
     ├── traffic/              # traffic generator + dataset
