@@ -54,3 +54,8 @@ test('detect: refuses to run without what the mode needs (no silent defaults)', 
   assert.throws(() => detect(samples[0], { ruleEngine: engine, threshold: 1, mode: 'stats' }));
   assert.throws(() => detect(samples[0], { ruleEngine: engine, model, threshold: 1, mode: 'x' }));
 });
+
+test('detect: the reason gives the threshold with two decimals, like the score', () => {
+  const res = detect(samples[1], { model, threshold: 1 / 3, mode: 'stats' });
+  assert.match(res.reasons.join(), /statistical score \d+\.\d\d \(length\) ≥ threshold 0\.33$/);
+});

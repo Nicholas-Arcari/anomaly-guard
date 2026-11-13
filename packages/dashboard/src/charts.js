@@ -1,7 +1,6 @@
 // Chart.js, registered once with only the pieces the dashboard uses (a smaller bundle) and themed
 // from the CSS tokens, so light and dark mode both work. Theme panels (E-02, E-03, E-06) reuse it:
-// register any extra Chart.js component they need (e.g. LineController and PointElement for the
-// ROC curve) in the list below.
+// register any extra Chart.js component they need in the list below.
 
 import {
   Chart,
@@ -12,6 +11,9 @@ import {
   DoughnutController,
   Legend,
   LinearScale,
+  LineController,
+  LineElement,
+  PointElement,
   Tooltip,
 } from 'chart.js';
 
@@ -23,6 +25,9 @@ Chart.register(
   DoughnutController,
   Legend,
   LinearScale,
+  LineController,
+  LineElement,
+  PointElement,
   Tooltip,
 );
 
@@ -85,5 +90,74 @@ export function doughnutChart(canvas, { labels, values, colors }) {
     type: 'doughnut',
     data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
     options: { cutout: '62%', plugins: { legend: { position: 'right' } } },
+  });
+}
+
+/**
+ * ROC curves (E-02, theme T3): true-positive rate against false-positive rate, one line per curve,
+ * the chance diagonal, and marked points such as the current operating point.
+ * @param {HTMLCanvasElement} canvas
+ * @param {{ curves: { label: string, color: string, points: { fpr: number, tpr: number }[] }[],
+ *   marks?: { label: string, color: string, fpr: number, tpr: number }[] }} data
+ */
+export function rocChart(canvas, { curves, marks = [] }) {
+  const percent = (value) => `${Math.round(Number(value) * 100)}%`;
+  const axis = (text) => ({
+    type: /** @type {const} */ ('linear'),
+    min: 0,
+    max: 1,
+    title: { display: true, text },
+    ticks: { callback: percent, stepSize: 0.2 },
+  });
+  return new Chart(canvas, {
+    type: 'line',
+    data: {
+      datasets: [
+        ...curves.map(({ label, color, points }) => ({
+          label,
+          data: points.map((p) => ({ x: p.fpr, y: p.tpr })),
+          borderColor: color,
+          backgroundColor: color,
+          borderWidth: 2,
+          pointRadius: 0,
+        })),
+        {
+          label: 'Chance (AUC 0.5)',
+          data: [
+            { x: 0, y: 0 },
+            { x: 1, y: 1 },
+          ],
+          borderColor: token('--border-strong'),
+          backgroundColor: token('--border-strong'),
+          borderDash: [4, 4],
+          borderWidth: 1,
+          pointRadius: 0,
+        },
+        ...marks.map(({ label, color, fpr, tpr }) => ({
+          label,
+          data: [{ x: fpr, y: tpr }],
+          showLine: false,
+          borderColor: color,
+          backgroundColor: token('--panel-bg'),
+          borderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 7,
+        })),
+      ],
+    },
+    options: {
+      scales: { x: axis('False-positive rate'), y: axis('True-positive rate (recall)') },
+      interaction: { mode: 'nearest', intersect: false },
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            label: (item) =>
+              `${item.dataset.label}: FPR ${(item.parsed.x * 100).toFixed(1)}%, ` +
+              `TPR ${(item.parsed.y * 100).toFixed(1)}%`,
+          },
+        },
+      },
+    },
   });
 }

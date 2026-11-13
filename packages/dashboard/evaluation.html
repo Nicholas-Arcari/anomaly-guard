@@ -23,38 +23,81 @@
           <p class="page-sub" data-experiment></p>
         </div>
 
-        <div class="callout is-warning">
-          These figures come from one seed and a threshold set by hand in the settings bar. The
-          honest operating point is set on the legitimate-only calibration split at a target
-          false-positive rate (ADR-009, task D-06), and every rate needs a confidence interval over
-          at least 20 seeds (D-04, D-05). Accuracy is not shown on purpose: the classes are
-          imbalanced.
+        <div class="callout">
+          One seed and one operating point, the honest way (ADR-009): the threshold is set on 2,000
+          legitimate calibration requests at the target false-positive rate, then the test split is
+          scored once. The intervals are 95% intervals for this test split: Wilson for the rates, a
+          seeded bootstrap for the AUC. How much the results move from seed to seed is measured by
+          the 20-seed experiment, <code>npm run experiments</code> (D-04). Accuracy is not shown on
+          purpose: the classes are imbalanced.
         </div>
 
-        <h2 class="section-title">Outcomes on the test split</h2>
-        <section class="kpis" id="counts" aria-label="Confusion counts"></section>
+        <h2 class="section-title">Operating point</h2>
+        <section class="kpis" id="operating" aria-label="Operating point"></section>
+        <div id="operating-note"></div>
+
+        <div class="grid grid-2">
+          <section class="panel" aria-labelledby="matrix-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="matrix-title">Confusion matrix</h2>
+              <span class="panel-meta">test split · rates with 95% Wilson intervals</span>
+            </div>
+            <div class="panel-body">
+              <div class="table-wrap" id="matrix"></div>
+              <p class="note" id="matrix-note"></p>
+            </div>
+          </section>
+          <section class="panel" aria-labelledby="variants-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="variants-title">By variant</h2>
+              <span class="panel-meta">share that raised an alert · 95% Wilson interval</span>
+            </div>
+            <div class="panel-body">
+              <div class="table-wrap" id="variants"></div>
+              <p class="note">
+                For attacks the share is the detection rate; for legitimate requests it is the
+                false-positive rate. Hard cases (O'Brien, long free text, non-Latin text) are not in
+                the calibration split.
+              </p>
+            </div>
+          </section>
+        </div>
 
         <h2 class="section-title">Rates</h2>
         <section class="kpis kpis-5" id="rates" aria-label="Error rates"></section>
 
         <div class="grid grid-2">
-          <div class="placeholder">
-            <span class="task">E-02 · T3</span>
-            <strong>ROC curve and AUC</strong>
-            <span
-              >True-positive rate against false-positive rate for every threshold, for rules,
-              statistics and the combination, with the area under each curve (needs D-03).</span
-            >
-          </div>
-          <div class="placeholder">
-            <span class="task">E-06 · T3</span>
-            <strong>Calibrated threshold, confusion matrix and per-variant results</strong>
-            <span
-              >The threshold for a target false-positive rate from the calibration split (D-06), the
-              confusion matrix, and the results by variant — canonical, obfuscated and novel
-              attacks; typical and hard legitimate requests — with Wilson intervals (D-05).</span
-            >
-          </div>
+          <section class="panel" aria-labelledby="roc-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="roc-title">ROC curve</h2>
+              <span class="panel-meta">every threshold, the same test requests</span>
+            </div>
+            <div class="panel-body">
+              <div class="chart-box is-tall" id="roc-box">
+                <canvas
+                  id="chart-roc"
+                  role="img"
+                  aria-label="ROC curves of rules only, statistics only and rules plus statistics, with the current operating point"
+                ></canvas>
+              </div>
+            </div>
+          </section>
+          <section class="panel" aria-labelledby="auc-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="auc-title">Area under the curve</h2>
+              <span class="panel-meta">95% bootstrap interval</span>
+            </div>
+            <div class="panel-body">
+              <div class="table-wrap" id="auc"></div>
+              <p class="note">
+                AUC is the probability that a random attack scores higher than a random legitimate
+                request (ties count half): 0.5 is chance, 1 is perfect. It does not depend on the
+                threshold. Rules only gives a single point (a rule matches or not), so its curve is
+                two straight lines. The interval resamples the attacks and the legitimate requests
+                of this test split 200 times (the experiments use 1,000).
+              </p>
+            </div>
+          </section>
         </div>
 
         <!-- include: partials/footer.html -->

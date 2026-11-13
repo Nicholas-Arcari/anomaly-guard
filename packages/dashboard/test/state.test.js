@@ -1,19 +1,27 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { DEFAULTS, parseState, toQuery, withState } from '../src/state.js';
+import { DEFAULTS, FPR_TARGETS, parseState, toQuery, withState } from '../src/state.js';
 
 test('parseState: no query gives the defaults', () => {
   assert.deepEqual(parseState(''), { ...DEFAULTS });
 });
 
 test('parseState: reads every setting', () => {
-  assert.deepEqual(parseState('?seed=7&mode=stats&threshold=2.5&prevalence=0.2&size=300'), {
-    seed: 7,
-    mode: 'stats',
-    threshold: 2.5,
-    prevalence: 0.2,
-    size: 300,
-  });
+  assert.deepEqual(
+    parseState('?seed=7&mode=stats&fpr=0.005&threshold=2.5&prevalence=0.2&size=300'),
+    { seed: 7, mode: 'stats', fpr: 0.005, threshold: 2.5, prevalence: 0.2, size: 300 },
+  );
+  assert.equal(parseState('?fpr=manual').fpr, 'manual');
+  for (const fpr of FPR_TARGETS) assert.equal(parseState(`?fpr=${fpr}`).fpr, fpr);
+});
+
+test('parseState: the target false-positive rate is calibrated at 1% unless chosen', () => {
+  assert.equal(DEFAULTS.fpr, 0.01);
+  // Only the offered targets: 0.1% needs 10,000 calibration requests (n ≥ 10/α, methods.md §6).
+  for (const query of ['fpr=0.001', 'fpr=0.5', 'fpr=1', 'fpr=', 'fpr=MANUAL', 'fpr=abc']) {
+    assert.equal(parseState(`?${query}`).fpr, 0.01, query);
+  }
+  assert.ok(FPR_TARGETS.every((target) => 2000 >= 10 / target - 1e-9));
 });
 
 test('parseState: an invalid value falls back to its own default only', () => {
@@ -38,20 +46,32 @@ test('parseState: an invalid value falls back to its own default only', () => {
 });
 
 test('toQuery / parseState: round trip', () => {
-  const state = { seed: 123, mode: 'rules', threshold: 3, prevalence: 0.05, size: 2000 };
-  assert.equal(toQuery(state), 'seed=123&mode=rules&threshold=3&prevalence=0.05&size=2000');
+  const state = {
+    seed: 123,
+    mode: 'rules',
+    fpr: 'manual',
+    threshold: 3,
+    prevalence: 0.05,
+    size: 2000,
+  };
+  assert.equal(
+    toQuery(state),
+    'seed=123&mode=rules&fpr=manual&threshold=3&prevalence=0.05&size=2000',
+  );
   assert.deepEqual(parseState(toQuery(state)), state);
+  const calibrated = { ...state, fpr: 0.02 };
+  assert.deepEqual(parseState(toQuery(calibrated)), calibrated);
 });
 
 test('withState: adds the settings and keeps other parameters and the hash', () => {
   const state = { ...DEFAULTS, seed: 9 };
   assert.equal(
     withState('./events.html', state),
-    './events.html?seed=9&mode=combined&threshold=1&prevalence=0.1&size=1000',
+    './events.html?seed=9&mode=combined&fpr=0.01&threshold=1&prevalence=0.1&size=1000',
   );
   assert.equal(
     withState('./events.html?show=alerts&seed=1#top', state),
-    './events.html?show=alerts&seed=9&mode=combined&threshold=1&prevalence=0.1&size=1000#top',
+    './events.html?show=alerts&seed=9&mode=combined&fpr=0.01&threshold=1&prevalence=0.1&size=1000#top',
   );
 });
 

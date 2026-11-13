@@ -31,8 +31,9 @@ Constraints:
 2. **Shared header, settings bar, sidebar and footer as partials** (`partials/*.html`), inserted
    by a small Vite plugin in `vite.config.js` (`<!-- include: partials/x.html -->`) in dev and in
    the build. No templating dependency.
-3. **Experiment settings in the URL**: `?seed=42&mode=combined&threshold=1&prevalence=0.1&size=1000`
-   (`src/state.js`). Every page rebuilds the same seeded experiment from them (same seed → same
+3. **Experiment settings in the URL**:
+   `?seed=42&mode=combined&fpr=0.01&threshold=1&prevalence=0.1&size=1000` (`src/state.js`; E-06
+   added `fpr`, the target false-positive rate the threshold is calibrated for). Every page rebuilds the same seeded experiment from them (same seed → same
    data); links carry them; nothing uses browser storage. The settings form applies on the Apply
    button's click and navigates from script: in a sandboxed iframe without `allow-forms` the
    browser cancels a form submission before the `submit` event even fires, but clicks and a page's

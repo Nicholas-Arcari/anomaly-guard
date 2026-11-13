@@ -21,7 +21,19 @@
     </select>
   </label>
   <label
-    title="Alert when the anomaly score s = −log10(p) reaches this value: 1 ≈ p ≤ 0.1, 2 ≈ p ≤ 0.01, 3 ≈ p ≤ 0.001"
+    title="The threshold is set on 2,000 legitimate calibration requests so that at most this share of them raises an alert (ADR-009). Manual: use the threshold on the right."
+  >
+    False positives
+    <select name="fpr">
+      <option value="0.05">5% (calibrated)</option>
+      <option value="0.02">2% (calibrated)</option>
+      <option value="0.01">1% (calibrated)</option>
+      <option value="0.005">0.5% (calibrated)</option>
+      <option value="manual">Manual threshold</option>
+    </select>
+  </label>
+  <label
+    title="Used when False positives is Manual. Alert when the anomaly score s = −log10(p) reaches this value: 1 ≈ p ≤ 0.1, 2 ≈ p ≤ 0.01, 3 ≈ p ≤ 0.001"
   >
     Threshold (−log₁₀ p)
     <input name="threshold" type="number" min="0" max="50" step="0.1" value="1" required />

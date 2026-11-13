@@ -49,7 +49,8 @@
               </li>
               <li>
                 <strong>Detect.</strong> Each request gets a rule verdict and an anomaly score s =
-                −log₁₀ p; the threshold turns the score into an alert.
+                −log₁₀ p. The threshold, set on legitimate requests for a target false-positive
+                rate, turns the score into an alert.
               </li>
               <li>
                 <strong>Evaluate.</strong> On a held-out test split: attacks caught and missed,
