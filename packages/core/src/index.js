@@ -15,7 +15,7 @@ export { RuleEngine, DEFAULT_RULES } from './rules/engine.js';
 
 export { trainStatModel, paramKey, pToScore } from './stats/model.js';
 export { lengthZScore, lengthScore } from './stats/length.js';
-export { chiSquareScore } from './stats/chisquare.js'; // stub — backlog C-03
+export { chiSquareScore } from './stats/chisquare.js';
 export { scoreRequest } from './stats/anomaly.js';
 
 export { detect } from './detector/detect.js';

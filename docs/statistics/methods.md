@@ -173,7 +173,7 @@ C-04 may compare the two (on raw and log-transformed lengths) and must decide ho
 never seen in training (Kruegel & Vigna treat an unexpected attribute as anomalous in itself).
 Confidence intervals proper are used on the evaluation metrics (§6).
 
-## 4. Chi-square score on the character distribution — `stats/chisquare.js` (stub, C-03)
+## 4. Chi-square score on the character distribution — `stats/chisquare.js` (implemented, C-03)
 
 The heart of the project (Kruegel & Vigna 2003, adapted in ADR-008). For one parameter value with
 `N` characters, `O_i` is the observed count of class `i`. The expected probabilities come from the
