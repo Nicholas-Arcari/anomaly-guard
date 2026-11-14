@@ -78,7 +78,7 @@
 
 | ID   | Task                                                                                                                                                   | Theme | Depends on | Status           |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- | ---------- | ---------------- |
-| B-01 | Rule engine: signatures for the **canonical** families only, written without looking at obfuscated/novel payloads (ADR-006); keep "which rule hit"     | T1    | F-05       | Ready (baseline) |
+| B-01 | Rule engine: signatures for the **canonical** families only, written without looking at obfuscated/novel payloads (ADR-006); keep "which rule hit"     | T1    | F-05       | Done             |
 | B-02 | Express monitor: threshold from a legit-only calibration batch at startup (`thresholdAtFpr`, D-06) instead of the fixed placeholder; validate the body | T3    | D-06       | Ready (baseline) |
 | B-03 | Request log + verdict stream for the dashboard                                                                                                         | —     | B-02       | Cut              |
 
