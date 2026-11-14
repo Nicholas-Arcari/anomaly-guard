@@ -86,12 +86,12 @@
 
 | ID   | Task                                                                                                                                                                                                                                         | Theme | Depends on | Status           |
 | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- | ---------- | ---------------- |
-| C-03 | **Chi-square score** in `stats/chisquare.js` (ADR-008, methods §4): Laplace-smoothed expected counts, df = 6, survival function in log space, score −log10(p), worst parameter; known-answer tests (χ² = 12.592 → p ≈ 0.05) and monotonicity | T1    | F-05       | Ready            |
+| C-03 | **Chi-square score** in `stats/chisquare.js` (ADR-008, methods §4): Laplace-smoothed expected counts, df = 6, survival function in log space, score −log10(p), worst parameter; known-answer tests (χ² = 12.592 → p ≈ 0.05) and monotonicity | T1    | F-05       | Done             |
 | C-04 | Length model in `stats/length.js`: Chebyshev baseline in place → decide the policy for unseen (path, param) pairs, try a log-transform or robust version, compare with the prediction interval                                               | T2    | F-05       | Ready (baseline) |
 | C-05 | Outliers in `stats/outliers.js`: IQR / MAD; Mahalanobis with a regularised covariance — each returns a tail probability → score                                                                                                              | T2    | F-05       | Ready            |
-| C-06 | Add C-03/C-04/C-05 to `scoreRequest` (`stats/anomaly.js`; max of the parts, ADR-007) and the model fields they need                                                                                                                          | T2    | C-03       | Blocked          |
+| C-06 | Add C-03/C-04/C-05 to `scoreRequest` (`stats/anomaly.js`; max of the parts, ADR-007) and the model fields they need                                                                                                                          | T2    | C-03       | Ready            |
 | C-07 | Detector explanations: which signal, which parameter, which probability (continuous score per mode already in place)                                                                                                                         | T2    | C-06       | Blocked          |
-| C-08 | For the report, legit vs attack over the whole test set: chi-square test of homogeneity on the seven classes (methods §4b), and the entropy distributions of the two groups (does entropy alone separate them?)                              | T1    | C-03       | Blocked          |
+| C-08 | For the report, legit vs attack over the whole test set: chi-square test of homogeneity on the seven classes (methods §4b), and the entropy distributions of the two groups (does entropy alone separate them?)                              | T1    | C-03       | Ready            |
 
 ## 6. D — Evaluation (`packages/evaluation`, `packages/experiments`)
 
@@ -124,7 +124,7 @@ member owns one theme end to end — its functions and tests, its dashboard char
 of the report — in whatever package the code lives. Each theme is one person's documented
 contribution for the individual grade.
 
-**T1 — Character distributions and chi-square** · member: _…_
+**T1 — Character distributions and chi-square** · member: Andrea Sangiovanni (`Sangioo`)
 
 - _Question:_ is the mix of characters in a value normal for that parameter?
 - _Tasks:_ C-03, B-01, C-08; chart: character classes, legit vs attack (E-02).

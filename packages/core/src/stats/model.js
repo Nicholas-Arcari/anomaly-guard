@@ -6,7 +6,7 @@
 //
 // One file per signal, so the people working on different signals rarely edit the same file:
 //   length.js     length bound — Chebyshev BASELINE in place     (C-04)
-//   chisquare.js  character distribution — specified stub        (C-03, C-08)
+//   chisquare.js  character distribution — chi-square score       (C-03, C-08)
 //   outliers.js   IQR / MAD, Mahalanobis — to be created         (C-05)
 //   anomaly.js    scoreRequest: combines the signals             (C-06)
 
