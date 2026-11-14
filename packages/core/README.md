@@ -68,9 +68,10 @@ no default threshold on purpose.
 
 ## Status
 
-Implemented: entropy + the seven character classes, feature extraction, a starter rule engine,
-the per-(path, parameter) model, a baseline length signal (Chebyshev bound → −log10 p), and a
-baseline detector with a continuous score per mode. Stubs with a backlog id: `chiSquareScore`
+Implemented: entropy + the seven character classes, feature extraction, canonical signature
+rules for SQL injection, XSS, path traversal and command injection (B-01), the per-(path,
+parameter) model, a baseline length signal (Chebyshev bound → −log10 p), and a baseline detector
+with a continuous score per mode. Stubs with a backlog id: `chiSquareScore`
 (C-03, the headline method), robust/multivariate outliers (C-05), adding them to `scoreRequest`
 (C-06). The maths is in
 [`../../docs/statistics/methods.md`](../../docs/statistics/methods.md).
